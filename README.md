@@ -10,7 +10,7 @@
 |_|   |_|  \___/    |_|    |_|  \___/
 ```
 
-**🎮 [Im Browser spielen](https://USER.github.io/piuu-piuu-3000/)**
+**🎮 [Im Browser spielen](https://USER.github.io/piu-piu/)**
 
 ## Starten
 
