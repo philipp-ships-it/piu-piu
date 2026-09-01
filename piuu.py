@@ -530,6 +530,18 @@ TITLE = [
 def _center(b, y, text, col=None):
     b.put((b.w - len(text)) // 2, y, text, col)
 
+def log_error(category, message):
+    """Enhanced error logging with category and timestamp."""
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+    error_msg = f"[{timestamp}] [{category}] {message}"
+    print(error_msg)
+    # Also write to a log file for debugging
+    try:
+        with open("piuu_error.log", "a", encoding="utf-8") as f:
+            f.write(error_msg + "\n")
+    except:
+        pass  # If we can't write to log file, just continue
 
 def draw_menu(sel_blink, hs, difficulty=1, mode='normal', show_settings=False, settings_sel=0, menu_sel=0, credits_page=0):
     b = Buf()
@@ -1045,26 +1057,45 @@ def main():
     if IS_WIN:
         try:
             os.system("title PIU PIU")
-        except Exception:
-            pass
+        except Exception as e:
+            log_error("TITLE_SETUP", f"window title setup failed: {str(e)}")
 
     if a.size:
         try:
             cw, ch = a.size.lower().split("x")
             set_size(int(cw), int(ch))
-        except Exception:
+        except Exception as e:
+            log_error("SIZE_SETUP", f"size setup failed: {str(e)}")
             print("--size braucht die Form BREITExHOEHE, z.B. 100x30")
             return
     else:
-        fit()
+        try:
+            fit()
+        except Exception as e:
+            log_error("FIT_SETUP", f"terminal fit failed: {str(e)}")
 
-    snd = Snd(a.silent)
-    keys = Keys()
+    try:
+        snd = Snd(a.silent)
+    except Exception as e:
+        log_error("SOUND_INIT", f"sound system initialization failed: {str(e)}")
+        snd = None
+
+    try:
+        keys = Keys()
+    except Exception as e:
+        log_error("KEY_INIT", f"keyboard initialization failed: {str(e)}")
+        keys = None
+
     wide = not a.ascii
     name = a.name or os.environ.get("USERNAME") or os.environ.get("USER") or "Piu"
     demo = a.demo > 0
 
-    out(CLEAR + HIDE)
+    try:
+        out(CLEAR + HIDE)
+    except Exception as e:
+        log_error("OUTPUT_SETUP", f"output initialization failed: {str(e)}")
+        # Continue anyway
+
     try:
         while True:
             # ---- Startscreen ----
@@ -1094,14 +1125,32 @@ def main():
                     difficulty = 1  # Default: Easy
                     mode = 'normal'  # Default: Normal
 
-                    draw_menu((blink // 5) % 2 == 0, best(), difficulty, mode, False, 0, menu_sel, credits_page)
-                    k = keys.get()
-                    if k == "quit":
-                        return
-                    if k == "pause":
-                        # Toggle pause (could be used to access settings in the future)
-                        blink = 0
+                    try:
+                        draw_menu((blink // 5) % 2 == 0, best(), difficulty, mode, False, 0, menu_sel, credits_page)
+                    except Exception as e:
+                        log_error("MENU_RENDER", f"draw_menu failed: {type(e).__name__}: {str(e)}")
+                        # Fallback to simple menu
+                        out(CLEAR + HOME)
+                        # Use the same buffer logic as draw_menu but without calling it
+                        b_fallback = Buf()
+                        if b_fallback.h >= 17 and b_fallback.w >= len(TITLE[0]) + 2:
+                            for i, row in enumerate(TITLE):
+                                _center(b_fallback, i + 1, row, CYN)
+                            y = len(TITLE) + 2
+                        else:
+                            _center(b_fallback, 1, "P I U P I U", CYN)
+                            y = 3
+                        _center(b_fallback, y, "MENU ERROR - RESTARTING", RED)
+                        _center(b_fallback, y + 2, "Press any key...", DIM)
+                        out(HOME + b_fallback.render())
+                        keys.wait_any()
                         continue
+
+                    try:
+                        k = keys.get()
+                    except Exception as e:
+                        log_error("KEY_READ", f"keyboard read failed: {type(e).__name__}: {str(e)}")
+                        k = None
 
                     # Menu navigation
                     if menu_sel == 0:  # Main Menu
