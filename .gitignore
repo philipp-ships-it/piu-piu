@@ -1,0 +1,19 @@
+# Highscores sind lokal
+piuu_highscores.json
+
+# PyInstaller
+build/
+dist/
+*.spec
+PIUU.exe
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store

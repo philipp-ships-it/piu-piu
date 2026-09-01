@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIUU PIUU 3000</title>
+<meta name="description" content="Die sinnloseste Windows-Terminal-Anwendung der Welt. Sie macht piuu piuu.">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#11151f; --edge:#222a3a;
+    --fg:#c8d3e6;
+    --dim:#6b7790; --grn:#5ef08a; --cyn:#59e0ff; --yel:#ffd45e;
+    --red:#ff5f6d; --mag:#c86bff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:
+      radial-gradient(1100px 600px at 50% -10%, #17203a 0%, transparent 60%),
+      var(--bg);
+    color:var(--fg); font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:38px 20px 70px}
+  header{text-align:center;margin-bottom:32px}
+  pre.logo{
+    color:var(--cyn); font-size:clamp(5px,1.75vw,13px); line-height:1.15;
+    margin:0 0 6px; text-shadow:0 0 18px rgba(89,224,255,.45); overflow:hidden;
+  }
+  .tag{color:var(--dim);letter-spacing:.16em;text-transform:uppercase;font-size:12px}
+  h2{color:var(--yel);font-size:17px;margin:34px 0 12px;letter-spacing:.04em}
+  a{color:var(--cyn)}
+  .card{
+    background:var(--panel); border:1px solid var(--edge); border-radius:12px;
+    padding:16px 18px; box-shadow:0 14px 40px rgba(0,0,0,.45);
+  }
+  /* --- Demo --- */
+  #screen{
+    background:#05070c; border:1px solid var(--edge); border-radius:10px;
+    padding:14px; min-height:230px; white-space:pre; overflow:hidden;
+    font-size:clamp(9px,1.55vw,14px); line-height:1.45;
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  button{
+    background:#18203a;color:var(--fg);
+    border:1px solid #2d3a58;border-radius:8px;padding:9px 16px;
+    font:inherit;font-size:14px;cursor:pointer;transition:.15s;
+  }
+  button:hover{background:#222d4d;border-color:var(--cyn);color:#fff}
+  button.primary{background:#1c3a2a;border-color:#2f6b48;color:var(--grn)}
+  button.primary:hover{background:#25523a}
+  .hint{color:var(--dim);font-size:13px}
+  .stats{color:var(--dim);font-size:13px;margin-top:10px}
+  .stats b{color:var(--grn);font-weight:600}
+  /* --- Tabelle / Code --- */
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{padding:7px 10px;border-bottom:1px solid var(--edge);text-align:left}
+  th{color:var(--yel);font-weight:600}
+  kbd{
+    background:#1a2236;border:1px solid #33405e;border-bottom-width:2px;
+    border-radius:5px;padding:1px 7px;font-size:13px;color:#fff
+  }
+  code,pre.sh{background:#05070c;border:1px solid var(--edge);border-radius:8px}
+  code{padding:2px 6px;font-size:13.5px;color:var(--grn)}
+  pre.sh{padding:14px 16px;overflow-x:auto;color:var(--grn);font-size:13.5px;margin:0}
+  ul{padding-left:20px} li{margin:5px 0}
+  footer{margin-top:44px;text-align:center;color:var(--dim);font-size:13px}
+  .c{color:var(--cyn)} .g{color:var(--grn)} .y{color:var(--yel)}
+  .r{color:var(--red)} .m{color:var(--mag)} .d{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<pre class="logo">  ____  _____ _   _ _   _   ____  _____ _   _ _   _
+ |  _ \|_   _| | | | | | | |  _ \|_   _| | | | | | |
+ | |_) | | | | | | | | | | | |_) | | | | | | | | | |
+ |  __/  | | | |_| | |_| | |  __/  | | | |_| | |_| |
+ |_|     |_|  \___/ \___/  |_|     |_|  \___/ \___/</pre>
+<div class="tag">~ 3000 ~ &nbsp;·&nbsp; sie macht piuu piuu</div>
+</header>
+
+<div class="card">
+  <div id="screen"></div>
+  <div class="row">
+    <button class="primary" id="fire">PIUU! (Leertaste)</button>
+    <button id="auto">Autofire: AUS</button>
+    <button id="mute">Ton: AN</button>
+    <button id="reset">Reset</button>
+  </div>
+  <div class="stats" id="stats">Kills: <b>0</b> · Schüsse: <b>0</b> · Score: <b>0</b> · Welle: <b>1</b></div>
+  <div class="hint" style="margin-top:6px">Browser-Demo mit echtem Laser-Sound. Die richtige Version läuft im Windows-Terminal.</div>
+</div>
+
+<h2>▸ Installieren</h2>
+<div class="card">
+<pre class="sh">git clone https://github.com/USER/piuu-piuu-3000.git
+cd piuu-piuu-3000
+python piuu.py</pre>
+<p class="hint" style="margin-bottom:0">Nur Python 3 nötig, keine Abhängigkeiten. Unter Windows reicht ein Doppelklick auf <code>PIUU.bat</code>.</p>
+</div>
+
+<h2>▸ Tasten</h2>
+<div class="card">
+<table>
+<tr><th style="width:34%">Taste</th><th>Wirkung</th></tr>
+<tr><td><kbd>Leertaste</kbd> / <kbd>Enter</kbd></td><td>schießen</td></tr>
+<tr><td><kbd>A</kbd></td><td>Autofire an/aus</td></tr>
+<tr><td><kbd>M</kbd></td><td>Ton stumm/laut</td></tr>
+<tr><td><kbd>N</kbd></td><td>Sound-Modus: laser → blaster → chaos</td></tr>
+<tr><td><kbd>P</kbd></td><td>Pause</td></tr>
+<tr><td><kbd>Q</kbd> / <kbd>Strg</kbd>+<kbd>C</kbd></td><td>beenden + Highscore speichern</td></tr>
+</table>
+</div>
+
+<h2>▸ Optionen</h2>
+<div class="card">
+<pre class="sh">python piuu.py --auto          # ballert von allein
+python piuu.py --mode chaos    # völlig irre Töne
+python piuu.py --speed 0.2     # schneller (kleiner = schneller)
+python piuu.py --silent        # ohne Ton
+python piuu.py --classic       # nur Laser, ohne Gegner
+python piuu.py --name Kevin    # Name für den Highscore
+python piuu.py --scores        # Hall of Fame anzeigen</pre>
+</div>
+
+<h2>▸ Features</h2>
+<div class="card">
+<ul>
+<li>Echte Töne über <code>winsound.Beep</code> — absteigender Sweep = „piuu"</li>
+<li>Gegner mit 1–3 HP, Explosions-Animation und <span class="r">*BOOM*</span> / <span class="r">*PENG*</span> / <span class="r">*BLUBB*</span></li>
+<li>Wellen alle 5 Kills, mit Fanfare und mehr Punkten</li>
+<li>Top-10-Highscores in <code>piuu_highscores.json</code>, inkl. 🥇🥈🥉</li>
+<li>Regenbogenfarben via ANSI, läuft in cmd.exe und Windows Terminal</li>
+<li>Als <code>PIUU.exe</code> baubar — <code>build_exe.bat</code> doppelklicken</li>
+</ul>
+</div>
+
+<h2>▸ Warum?</h2>
+<div class="card">
+<p style="margin:0">Sinn des Ganzen: weiterhin unklar.</p>
+</div>
+
+<footer>PIUU PIUU 3000 · MIT-Lizenz · gebaut, weil es piuu piuu macht</footer>
+</div>
+
+<script>
+(function(){
+const SHIP='>=|=>', W=64;
+const ENEMIES=['<@>','{x}','(o)','<#>','[*]','<%>','vVv'];
+const BOOMS=['*BOOM*','*PENG*','*KRACH*','*PLOPP*','*RUMMS*','*BLUBB*'];
+const TRAILS=['-','=','~','*','·'];
+const CLS=['r','y','g','c','m'];
+const screenEl=document.getElementById('screen'),
+      statsEl=document.getElementById('stats'),
+      bFire=document.getElementById('fire'),
+      bAuto=document.getElementById('auto'),
+      bMute=document.getElementById('mute'),
+      bReset=document.getElementById('reset');
+
+let lines=[], st={kills:0,shots:0,score:0,wave:1},
+    busy=false, auto=false, muted=false, enemy=null, ac=null;
+
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pad=n=>' '.repeat(Math.max(0,n));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function push(html){ lines.push(html); if(lines.length>11) lines.shift(); draw(); }
+function draw(cur){
+  screenEl.innerHTML=(cur!==undefined?lines.concat(cur):lines).join('\n');
+}
+function stats(){
+  statsEl.innerHTML='Kills: <b>'+st.kills+'</b> · Schüsse: <b>'+st.shots+
+    '</b> · Score: <b>'+st.score+'</b> · Welle: <b>'+st.wave+'</b>';
+}
+
+// --- WebAudio: piuu ---
+function tone(f0,f1,dur,type){
+  if(muted) return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended') ac.resume();
+    const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime;
+    o.type=type||'square';
+    o.frequency.setValueAtTime(f0,t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(40,f1),t+dur);
+    g.gain.setValueAtTime(.13,t);
+    g.gain.exponentialRampToValueAtTime(.0008,t+dur);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+.02);
+  }catch(e){}
+}
+const piuu =()=>tone(1600+Math.random()*600,320,.18,'square');
+const boom =()=>{ tone(240,45,.32,'sawtooth'); setTimeout(()=>tone(160,35,.26,'square'),40); };
+const fanfare=()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.11,'triangle'),i*110));
+
+function newEnemy(){
+  enemy={ch:ENEMIES[(Math.random()*ENEMIES.length)|0], hp:1+((Math.random()*3)|0)};
+}
+function idle(){
+  if(!enemy) newEnemy();
+  const gap=W-SHIP.length-enemy.ch.length;
+  push('<span class="c">'+esc(SHIP)+'</span>'+pad(gap)+
+       '<span class="r">'+esc(enemy.ch)+'</span><span class="d">  HP:'+'#'.repeat(enemy.hp)+'</span>');
+}
+
+async function shoot(){
+  if(busy) return; busy=true;
+  if(!enemy) newEnemy();
+  const cls=CLS[(Math.random()*CLS.length)|0], tr=TRAILS[(Math.random()*TRAILS.length)|0];
+  const gap=W-SHIP.length-enemy.ch.length, step=2;
+  lines.pop();
+
+  for(let x=0;x<gap;x+=step){
+    const beam=tr.repeat(Math.min(7,gap-x));
+    draw('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(x)+
+         '<span class="'+cls+'">'+esc(beam)+'</span>'+pad(Math.max(0,gap-x-beam.length))+
+         '<span class="r">'+esc(enemy.ch)+'</span>');
+    await sleep(11);
+  }
+  piuu(); st.shots++; enemy.hp--;
+
+  if(enemy.hp>0){
+    push('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+
+         '<span class="y">'+esc(enemy.ch)+' &lt;- hält noch durch</span>');
+    await sleep(160);
+  }else{
+    for(const f of ['<span class="y">\\|/</span>','<span class="r">-*-</span>',
+                    '<span class="m">/|\\</span>','<span class="d"> . </span>']){
+      draw('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+f);
+      await sleep(55);
+    }
+    boom();
+    const pts=50+((Math.random()*200)|0)+st.wave*10;
+    st.kills++; st.score+=pts;
+    push('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+
+         '<span class="g">'+BOOMS[(Math.random()*BOOMS.length)|0]+'</span>'+
+         '<span class="d">  +'+pts+' Punkte</span>');
+    enemy=null;
+    if(st.kills%5===0){
+      st.wave++;
+      push('<span class="c">  &gt;&gt;&gt; WELLE '+st.wave+' &lt;&lt;&lt;</span>'+
+           '<span class="d">  (die Gegner werden nicht schlauer)</span>');
+      fanfare(); await sleep(320);
+    }
+    await sleep(120);
+  }
+  stats(); idle(); busy=false;
+}
+
+function reset(){
+  lines=[]; st={kills:0,shots:0,score:0,wave:1}; enemy=null;
+  push('<span class="d">  PIUU PIUU 3000 — Leertaste zum Feuern</span>');
+  push('<span class="c">  &gt;&gt;&gt; WELLE 1 &lt;&lt;&lt;</span><span class="d">  (die Gegner werden nicht schlauer)</span>');
+  stats(); idle();
+}
+
+bFire.onclick=shoot;
+bReset.onclick=reset;
+bAuto.onclick=()=>{ auto=!auto; bAuto.textContent='Autofire: '+(auto?'AN':'AUS'); if(auto) shoot(); };
+bMute.onclick =()=>{ muted=!muted; bMute.textContent='Ton: '+(muted?'AUS':'AN'); };
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); shoot(); }
+  else if(e.key==='a'||e.key==='A') bAuto.click();
+  else if(e.key==='m'||e.key==='M') bMute.click();
+});
+setInterval(()=>{ if(auto&&!busy) shoot(); },420);
+reset();
+})();
+</script>
+</body>
+</html>
