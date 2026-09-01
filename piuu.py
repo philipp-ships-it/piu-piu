@@ -531,7 +531,7 @@ def _center(b, y, text, col=None):
     b.put((b.w - len(text)) // 2, y, text, col)
 
 
-def draw_start(sel_blink, hs):
+def draw_menu(sel_blink, hs, difficulty=1, mode='normal', show_settings=False, settings_sel=0, menu_sel=0, credits_page=0):
     b = Buf()
     y = 1
     if b.h >= 17 and b.w >= len(TITLE[0]) + 2:
@@ -555,17 +555,69 @@ def draw_start(sel_blink, hs):
         y += 2
     b.put(0, min(y, b.h - 6), "^" * b.w, DIM)
 
-    # START-Block vertikal in den freien Raum setzen (max. 5 vom Rand)
-    by = min(b.h - 5, y + 2 + (b.h - y - 7) // 2)
-    by = max(by, y + 2)
-    _center(b, by, "[ START ]" if sel_blink else "[       ]", GRN)
-    if b.w >= 50:
-        _center(b, by + 2, "LEER=springen  ENTER=piu piu  S=ducken  Q=ende", DIM)
-    else:
-        _center(b, by + 2, "LEER=hopp  ENTER=piu  S=duck  Q=ende", DIM)
-    _center(b, by + 3, "10 schuss / 30s   danach 5s nachladen", DIM)
-    if hs:
-        _center(b, by + 4, "bestleistung: %d" % hs, YEL)
+    if show_settings:
+        # Settings Menu
+        settings_options = [
+            "[ Difficulty: Easy ]" if difficulty == 1 else "[ Difficulty: Medium ]" if difficulty == 2 else "[ Difficulty: Hard ]",
+            "[ Mode: Normal ]" if mode == 'normal' else "[ Mode: Endless ]",
+            "[ Controls: WASD ]",
+            "[ Graphics: Full ]",
+            "[ Sound: On ]",
+            "[ Press Enter to Start ]"
+        ]
+
+        for i, option in enumerate(settings_options):
+            color = GRN if settings_sel == i and option.startswith("[ ") else YEL if settings_sel == i else DIM
+            _center(b, by + 2 + i, option, color)
+    elif menu_sel == 0:
+        # Main Menu
+        _center(b, by + 2, "[ START GAME ]" if sel_blink else "[           ]", GRN)
+        _center(b, by + 3, "[ SETTINGS ]" if menu_sel == 1 else "[             ]", CYN)
+        _center(b, by + 4, "[ MODS ]" if menu_sel == 2 else "[          ]", MAG)
+        _center(b, by + 5, "[ CREDITS ]" if menu_sel == 3 else "[            ]", YEL)
+        _center(b, by + 6, "[ EXIT ]" if menu_sel == 4 else "[          ]", RED)
+    elif menu_sel == 1:
+        # Settings Menu
+        _center(b, by + 2, "[ Difficulty ]" if settings_sel == 0 else "[               ]", YEL)
+        _center(b, by + 3, "[ Game Mode ]" if settings_sel == 1 else "[                 ]", CYN)
+        _center(b, by + 4, "[ Controls ]" if settings_sel == 2 else "[               ]", MAG)
+        _center(b, by + 5, "[ Graphics ]" if settings_sel == 3 else "[               ]", GRN)
+        _center(b, by + 6, "[ Sound ]" if settings_sel == 4 else "[                ]", RED)
+    elif menu_sel == 2:
+        # Mods Menu - Show some featured mods or info
+        mod_info = [
+            "[ 1. Speed Mod: x1.5 (Hard) ]",
+            "[ 2. Double Jump: Enabled ]",
+            "[ 3. Infinite Ammo: On ]",
+            "[ 4. Fast Reload: 15s ]",
+            "[ 5. Big Enemies: Off ]",
+            "[ Press SPACE for more ]"
+        ]
+
+        for i, line in enumerate(mod_info):
+            color = YEL if i == credits_page else DIM
+            _center(b, by + 2 + i, line, color)
+    elif menu_sel == 3:
+        # Credits Menu
+        credit_lines = [
+            "[ PIU PIU - ASCII Endlosrunner ]",
+            "[ Created by: Philipp Paulik ]",
+            "[ Version: 1.0.0 ]",
+            "",
+            "[ Controls: WASD + Space + S + Q ]",
+            "[ Easy/Medium/Hard difficulties ]",
+            "[ Endless and Normal modes ]",
+            "",
+            "[ Special thanks to all testers! ]"
+        ]
+
+        for i, line in enumerate(credit_lines):
+            color = CYN if i == credits_page else DIM
+            _center(b, by + 2 + i, line, color)
+    elif menu_sel == 4:
+        # Exit Confirmation
+        _center(b, by + 2, "[ YES ]" if credits_page == 0 else "[ NO ]", RED)
+
     out(HOME + b.render())
 
 
@@ -633,10 +685,12 @@ def out(s):
 
 # ---------------- Spiel ----------------
 class Game:
-    def __init__(self, snd, wide_ok, speed_mult=1.0):
+    def __init__(self, snd, wide_ok, speed_mult=1.0, difficulty=1, mode='normal'):
         self.snd = snd
         self.wide = wide_ok
         self.sm = speed_mult
+        self.difficulty = difficulty
+        self.mode = mode
         self.y = 0.0          # Hoehe ueber Boden
         self.vy = 0.0
         self.jumps = 0
@@ -666,6 +720,20 @@ class Game:
         for ry in rows:
             self.bg.append([random.uniform(0, W), ry, random.choice(PHRASES)])
         self.clouds.append([random.uniform(0, W), 1])
+
+        # Difficulty-based settings
+        self.base_speed = speed_mult
+        self.obstacle_spawn_rate = max(5.0, 15.0 - (difficulty * 3.0))  # 15s -> 5s for Easy -> Hard
+        self.word_obstacle_chance = min(0.4, 0.16 + (difficulty - 1) * 0.1)  # Easy: 16%, Medium: 26%, Hard: 36%
+        self.hard_collision = (difficulty == 3)  # Hard: birds cause damage even when ducking
+
+        # Mode-based settings
+        if mode == 'endless':
+            self.endless_mode = True
+            self.dist_target = None  # No distance target for endless mode
+        else:
+            self.endless_mode = False
+            self.dist_target = 400  # Normal mode target distance
 
     # ---- Aktionen ----
     def jump(self):
@@ -1018,19 +1086,100 @@ def main():
                             return
                         time.sleep(0.25)
                         continue
-                    draw_start((blink // 5) % 2 == 0, best())
+
+                    # Menu state
+                    menu_sel = 0  # 0: Main, 1: Settings, 2: Mods, 3: Credits, 4: Exit
+                    settings_sel = 0
+                    credits_page = 0
+                    difficulty = 1  # Default: Easy
+                    mode = 'normal'  # Default: Normal
+
+                    draw_menu((blink // 5) % 2 == 0, best(), difficulty, mode, False, 0, menu_sel, credits_page)
                     k = keys.get()
                     if k == "quit":
                         return
-                    if k in ("jump", "shoot"):
-                        break
+                    if k == "pause":
+                        # Toggle pause (could be used to access settings in the future)
+                        blink = 0
+                        continue
+
+                    # Menu navigation
+                    if menu_sel == 0:  # Main Menu
+                        if k == "jump":
+                            menu_sel = (menu_sel + 1) % 5  # Navigate between main menu items
+                        elif k == "duck":
+                            menu_sel = (menu_sel + 4) % 5  # Navigate backwards
+                        elif k == "shoot":
+                            if menu_sel == 0:  # Start Game
+                                break
+                            elif menu_sel == 1:  # Settings
+                                settings_sel = 0
+                                menu_sel = 1  # Enter settings
+                            elif menu_sel == 2:  # Mods
+                                credits_page = 0
+                                menu_sel = 2  # Enter mods
+                            elif menu_sel == 3:  # Credits
+                                credits_page = 0
+                                menu_sel = 3  # Enter credits
+                            elif menu_sel == 4:  # Exit
+                                menu_sel = 5  # Enter exit confirmation
+                    elif menu_sel == 1:  # Settings
+                        if k == "jump":
+                            settings_sel = max(0, settings_sel - 1)
+                        elif k == "duck":
+                            settings_sel = min(5, settings_sel + 1)
+                        elif k == "shoot":
+                            if settings_sel == 0:  # Difficulty
+                                difficulty = (difficulty % 3) + 1
+                            elif settings_sel == 1:  # Game Mode
+                                mode = 'endless' if mode == 'normal' else 'normal'
+                            elif settings_sel == 2:  # Controls
+                                pass
+                            elif settings_sel == 3:  # Graphics
+                                pass
+                            elif settings_sel == 4:  # Sound
+                                pass
+                            elif settings_sel == 5:  # Back to main menu
+                                menu_sel = 0
+                    elif menu_sel == 2:  # Mods
+                        if k == "jump":
+                            credits_page = max(0, credits_page - 1)
+                        elif k == "duck":
+                            credits_page = min(9, credits_page + 1)
+                        elif k == "shoot":
+                            if credits_page == 9:
+                                menu_sel = 0  # Back to main menu
+                    elif menu_sel == 3:  # Credits
+                        if k == "jump":
+                            credits_page = max(0, credits_page - 1)
+                        elif k == "duck":
+                            credits_page = min(11, credits_page + 1)
+                        elif k == "shoot":
+                            if credits_page == 11:
+                                menu_sel = 0  # Back to main menu
+                    elif menu_sel == 4:  # Exit Confirmation
+                        if k == "jump":
+                            menu_sel = 4  # Yes (default)
+                        elif k == "duck":
+                            menu_sel = 0  # No
+                        elif k == "shoot":
+                            if menu_sel == 4:  # Yes
+                                return
+                            else:
+                                menu_sel = 0
                     blink += 1
                     time.sleep(0.07)
                 snd.start()
                 out(CLEAR)
 
             # ---- Runde ----
-            g = Game(snd, wide, a.speed)
+            # Apply game settings (difficulty affects speed, mode can be used for future enhancements)
+            speed_mult = a.speed
+            if difficulty == 2:
+                speed_mult *= 0.8    # Medium: 20% slower
+            elif difficulty == 3:
+                speed_mult *= 0.6    # Hard: 40% slower
+            g = Game(snd, wide, speed_mult, difficulty, mode)
             frames = 0
             while not g.dead:
                 if demo:
