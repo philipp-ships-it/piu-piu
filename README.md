@@ -94,6 +94,30 @@ Und natürlich Wort-Hindernisse: `piu` · `piu piu` · `autsch*` · `aslok` · `
 - Es wird immer schneller. Kills geben +25 Punkte.
 - Startscreen mit `[ START ]`, Game-Over-Screen mit **Hall of Piu**
 
+## Responsive TUI
+
+Das Spielfeld **passt sich automatisch der Terminalgröße an** — auch während
+des Spielens. Fenster ziehen und es skaliert live mit:
+
+- Spielfeld nutzt die volle Breite/Höhe (46×14 bis 200×44)
+- Boden, Wolken und Hintergrund-Sprüche skalieren mit; breite Fenster
+  bekommen mehr Deko statt leerer Fläche
+- HUD kürzt sich bei schmalen Terminals:
+  `score 320 best 999 kills 4 88m x1.4  piu [||||||....] 6 12s`
+  → `320 best 999 k4 88m  piu [||||||....]` → `320 k4 88m  piu 6`
+- Start- und Game-Over-Screen zentrieren sich; unter 17 Zeilen wird
+  das große ASCII-Logo durch eine kompakte Zeile ersetzt
+- Zu kleines Fenster → freundlicher Hinweis, es geht automatisch weiter,
+  sobald du wieder aufziehst
+
+Feste Größe erzwingen: `python piuu.py --size 100x30`
+
+## Spielername
+
+Der Name für den Highscore kommt aus deiner Umgebung (`%USERNAME%` unter
+Windows, `$USER` unter Linux/macOS) — nichts ist im Code hinterlegt.
+Überschreiben mit `--name Kevin`.
+
 ## Optionen
 
 ```
@@ -102,6 +126,7 @@ python piuu.py --ascii         # reines ASCII-Maennchen (o_o)/
 python piuu.py --speed 0.7     # gemütlicher
 python piuu.py --name Kevin    # Name für den Highscore
 python piuu.py --scores        # Hall of Piu anzeigen
+python piuu.py --size 100x30   # feste Spielfeldgroesse statt automatisch
 python piuu.py --demo 300      # Autoplay-Demo (Test, ohne Tastatur)
 ```
 

@@ -53,10 +53,45 @@ SHOW = "\033[?25h"
 HOME = "\033[H"
 CLEAR = "\033[2J"
 
-W = 78          # Spielfeldbreite
-H = 18          # Spielfeldhoehe
-GROUND = H - 4  # Zeile der Bodenlinie
-PX = 6          # Spieler-x
+# --- Spielfeld-Geometrie: passt sich dem Terminal an ---
+MIN_W, MAX_W = 46, 200
+MIN_H, MAX_H = 14, 44
+
+W = 78
+H = 18
+GROUND = H - 4
+PX = 6
+TOO_SMALL = False
+
+
+def term_size():
+    try:
+        c = os.get_terminal_size()
+        return c.columns, c.lines
+    except OSError:
+        return 80, 24
+
+
+def fit():
+    """Terminalgroesse lesen, W/H/GROUND/PX anpassen. True bei Aenderung."""
+    global W, H, GROUND, PX, TOO_SMALL
+    cols, rows = term_size()
+    TOO_SMALL = cols < MIN_W + 1 or rows < MIN_H + 1
+    nw = max(MIN_W, min(MAX_W, cols - 1))
+    nh = max(MIN_H, min(MAX_H, rows - 1))
+    ng = nh - max(3, min(6, nh // 5))
+    npx = max(3, min(10, nw // 13))
+    changed = (nw, nh, ng, npx) != (W, H, GROUND, PX)
+    W, H, GROUND, PX = nw, nh, ng, npx
+    return changed
+
+
+def set_size(cols, rows):
+    global W, H, GROUND, PX
+    W = max(MIN_W, min(MAX_W, cols))
+    H = max(MIN_H, min(MAX_H, rows))
+    GROUND = H - max(3, min(6, H // 5))
+    PX = max(3, min(10, W // 13))
 
 # ---------------- Der Held (Kaomoji-Maennchen) ----------------
 # Alle Posen sind gleich breit, damit nichts wackelt.
@@ -349,18 +384,21 @@ class Keys:
 # ---------------- Framebuffer ----------------
 class Buf:
     def __init__(self):
-        self.g = [[" "] * W for _ in range(H)]
-        self.c = [[None] * W for _ in range(H)]
+        self.w = W
+        self.h = H
+        self.g = [[" "] * self.w for _ in range(self.h)]
+        self.c = [[None] * self.w for _ in range(self.h)]
 
     def put(self, x, y, s, col=None, wide=False):
-        if y < 0 or y >= H:
+        if y < 0 or y >= self.h:
             return
+        x = int(x)
         for i, chpos in enumerate(s):
             xx = x + i
-            if 0 <= xx < W:
+            if 0 <= xx < self.w:
                 self.g[y][xx] = chpos
                 self.c[y][xx] = col
-        if wide and 0 <= x + 1 < W:
+        if wide and 0 <= x + 1 < self.w:
             self.g[y][x + 1] = ""
             self.c[y][x + 1] = col
 
@@ -370,10 +408,10 @@ class Buf:
 
     def render(self):
         lines = []
-        for y in range(H):
+        for y in range(self.h):
             parts = []
             cur = None
-            for x in range(W):
+            for x in range(self.w):
                 ch = self.g[y][x]
                 if ch == "":
                     continue
@@ -427,27 +465,45 @@ TITLE = [
 ]
 
 
+def _center(b, y, text, col=None):
+    b.put((b.w - len(text)) // 2, y, text, col)
+
+
 def draw_start(sel_blink, hs):
     b = Buf()
-    for i, row in enumerate(TITLE):
-        b.put((W - len(row)) // 2, 1 + i, row, CYN)
-    b.put((W - 28) // 2, 7, "renn. spring. mach piu piu.", DIM)
+    y = 1
+    if b.h >= 17 and b.w >= len(TITLE[0]) + 2:
+        for i, row in enumerate(TITLE):
+            _center(b, y + i, row, CYN)
+        y += len(TITLE) + 1
+    else:
+        _center(b, y, "P I U   P I U", CYN)
+        y += 2
+    _center(b, y, "renn. spring. mach piu piu.", DIM)
+    y += 2
 
-    b.put(6, 9, HERO_KAO["run"][0], GRN)
-    b.put(14, 9, "- - -", YEL)
-    b.put(20, 9, "piu piu", MAG)
-    b.put(32, 9, "~o>", RED)
-    b.put(40, 9, " _  ", GRN)
-    b.put(40, 10, "|_| ", GRN)
+    if b.h >= 16 and b.w >= 44:
+        sx = max(2, (b.w - 40) // 2)
+        b.put(sx, y, HERO_KAO["run"][0], GRN)
+        b.put(sx + 9, y, "- - -", YEL)
+        b.put(sx + 16, y, "piu piu", MAG)
+        b.put(sx + 27, y, "~o>", RED)
+        b.put(sx + 34, y, " _ ", GRN)
+        b.put(sx + 34, y + 1, "|_|", GRN)
+        y += 2
+    b.put(0, min(y, b.h - 6), "^" * b.w, DIM)
 
-    b.put(0, 11, "^" * W, DIM)
-
-    btn = "[ START ]" if sel_blink else "[        ]"
-    b.put((W - len(btn)) // 2, 13, btn, GRN)
-    b.put((W - 46) // 2, 15, "LEER=springen  ENTER=piu piu  S=ducken  Q=ende", DIM)
-    b.put((W - 40) // 2, 16, "10 schuss / 30s   danach 5s nachladen", DIM)
+    # START-Block vertikal in den freien Raum setzen (max. 5 vom Rand)
+    by = min(b.h - 5, y + 2 + (b.h - y - 7) // 2)
+    by = max(by, y + 2)
+    _center(b, by, "[ START ]" if sel_blink else "[       ]", GRN)
+    if b.w >= 50:
+        _center(b, by + 2, "LEER=springen  ENTER=piu piu  S=ducken  Q=ende", DIM)
+    else:
+        _center(b, by + 2, "LEER=hopp  ENTER=piu  S=duck  Q=ende", DIM)
+    _center(b, by + 3, "10 schuss / 30s   danach 5s nachladen", DIM)
     if hs:
-        b.put((W - 20) // 2, 17, "bestleistung: %d" % hs, YEL)
+        _center(b, by + 4, "bestleistung: %d" % hs, YEL)
     out(HOME + b.render())
 
 
@@ -461,24 +517,42 @@ GAMEOVER = [
 
 def draw_gameover(score, kills, dist, rank, scores):
     b = Buf()
-    for i, row in enumerate(GAMEOVER):
-        b.put((W - len(row)) // 2, 1 + i, row, RED)
-    kao = HERO_KAO["dead"][0]
-    b.put((W - len(kao)) // 2, 6, kao, RED)
-    b.put((W - 7) // 2, 7, "autsch*", YEL)
-    msg = "score %d   kills %d   strecke %dm" % (score, kills, dist)
-    b.put((W - len(msg)) // 2, 8, msg, WHT)
-    if rank == 1:
-        b.put((W - 21) // 2, 9, "*** NEUER REKORD! ***", MAG)
-    elif rank:
-        b.put((W - 18) // 2, 9, "platz %d der liste" % rank, GRN)
+    y = 1
+    if b.h >= 17 and b.w >= len(GAMEOVER[0]) + 2:
+        for i, row in enumerate(GAMEOVER):
+            _center(b, y + i, row, RED)
+        y += len(GAMEOVER) + 1
+    else:
+        _center(b, y, "*** GAME OVER ***", RED)
+        y += 2
 
-    b.put((W - 17) // 2, 11, "-- hall of piu --", CYN)
-    for i, e in enumerate(scores[:4]):
-        row = "%d. %-14s %6d" % (i + 1, e.get("name", "?"), e.get("score", 0))
-        b.put((W - len(row)) // 2, 12 + i, row, GRN if (i + 1) == rank else DIM)
-    b.put((W - 34) // 2, 16, "LEERTASTE = nochmal    Q = ende", YEL)
+    _center(b, y, HERO_KAO["dead"][0], RED)
+    _center(b, y + 1, "autsch*", YEL)
+    _center(b, y + 2, "score %d   kills %d   strecke %dm" % (score, kills, dist), WHT)
+    if rank == 1:
+        _center(b, y + 3, "*** NEUER REKORD! ***", MAG)
+    elif rank:
+        _center(b, y + 3, "platz %d der liste" % rank, GRN)
+
+    y += 5
+    room = (b.h - 2) - y
+    if room >= 2:
+        _center(b, y, "-- hall of piu --", CYN)
+        for i, e in enumerate(scores[:max(0, min(5, room - 1))]):
+            row = "%d. %-14s %6d" % (i + 1, e.get("name", "?"), e.get("score", 0))
+            _center(b, y + 1 + i, row, GRN if (i + 1) == rank else DIM)
+
+    _center(b, b.h - 1, "LEERTASTE = nochmal    Q = ende", YEL)
     out(HOME + b.render())
+
+
+def draw_too_small():
+    cols, rows = term_size()
+    out(CLEAR + HOME)
+    out(YEL + "  Terminal zu klein\n\n" + R)
+    out("  jetzt:    %d x %d\n" % (cols, rows))
+    out("  noetig: >=%d x %d\n\n" % (MIN_W + 1, MIN_H + 1))
+    out(DIM + "  Fenster groesser ziehen - es geht automatisch weiter.\n" + R)
 
 
 def out(s):
@@ -515,7 +589,9 @@ class Game:
         self.dead = False
         self.msg = ""
         self.msg_t = 0
-        rows = random.sample(range(2, GROUND - 5), 3)
+        _span = list(range(2, max(3, GROUND - 5)))
+        _cnt = max(3, min(7, (W * GROUND) // 300))
+        rows = random.sample(_span, min(_cnt, len(_span)))
         for ry in rows:
             self.bg.append([random.uniform(0, W), ry, random.choice(PHRASES)])
         self.clouds.append([random.uniform(0, W), 1])
@@ -550,6 +626,22 @@ class Game:
         if self.ammo == 0:
             self.reload_t = RELOAD_TIME
             self.snd.empty()
+
+    def on_resize(self):
+        """Nach Groessenaenderung alles wieder ins Bild holen."""
+        self.bg = [p for p in self.bg if 2 <= p[1] < max(3, GROUND - 4)]
+        for p in self.bg:
+            p[0] = min(p[0], float(W))
+        for c in self.clouds:
+            c[0] = min(c[0], float(W))
+        self.obs = [o for o in self.obs if o["x"] < W + 4]
+        self.bul = [bl for bl in self.bul if bl[0] < W]
+        for bl in self.bul:
+            bl[1] = max(0, min(GROUND - 1, bl[1]))
+        self.parts = []
+        if GROUND - 1 - int(round(self.y)) < 1:
+            self.y = 0.0
+            self.vy = 0.0
 
     # ---- Physik / Logik ----
     def step(self):
@@ -596,16 +688,18 @@ class Game:
         for p in self.bg:
             p[0] -= self.speed * 0.35
         self.bg = [p for p in self.bg if p[0] + len(p[2]) > 0]
-        if random.random() < 0.035 and len(self.bg) < 5:
+        max_bg = max(3, min(9, (W * GROUND) // 260))
+        if random.random() < 0.035 * (W / 78.0) and len(self.bg) < max_bg:
             taken = {p[1] for p in self.bg if p[0] + len(p[2]) > W - 4}
-            free = [y for y in range(2, GROUND - 5) if y not in taken]
+            free = [y for y in range(2, max(3, GROUND - 5)) if y not in taken]
             if free:
                 self.bg.append([float(W), random.choice(free),
                                 random.choice(PHRASES)])
         for c in self.clouds:
             c[0] -= self.speed * 0.18
         self.clouds = [c for c in self.clouds if c[0] + 11 > 0]
-        if random.random() < 0.012 and len(self.clouds) < 2:
+        max_cl = max(2, min(5, W // 42))
+        if random.random() < 0.012 * (W / 78.0) and len(self.clouds) < max_cl:
             self.clouds.append([float(W), random.choice([0, 1])])
 
         # Hindernisse
@@ -743,26 +837,40 @@ class Game:
 
         # Boden
         pat = "^~-_" 
-        gline = "".join(pat[(x + int(self.dist)) % len(pat)] for x in range(W))
-        b.put(0, GROUND, "_" * W, DIM)
+        gline = "".join(pat[(x + int(self.dist)) % len(pat)] for x in range(b.w))
+        b.put(0, GROUND, "_" * b.w, DIM)
         b.put(0, GROUND + 1, gline, DIM)
 
-        hud = " score %5d  best %5d  kills %2d  %4dm  x%.1f" % (
-            self.score, max(hs, self.score), self.kills,
-            int(self.dist / 4), self.speed)
-        b.put(1, H - 1, hud, WHT)
-
-        # Munitionsanzeige
-        ax = W - 26
-        if self.reload_t > 0:
-            frac = 1.0 - (self.reload_t / RELOAD_TIME)
-            filled = int(round(frac * 10))
-            bar = "#" * filled + "." * (10 - filled)
-            b.put(ax, H - 1, "RELOAD [%s] %.1fs" % (bar, self.reload_t), RED)
+        if b.w >= 74:
+            hud = " score %5d  best %5d  kills %2d  %4dm  x%.1f" % (
+                self.score, max(hs, self.score), self.kills,
+                int(self.dist / 4), self.speed)
+        elif b.w >= 58:
+            hud = " %5d  best %5d  k%2d  %4dm" % (
+                self.score, max(hs, self.score), self.kills, int(self.dist / 4))
         else:
-            col = GRN if self.ammo > 3 else YEL
+            hud = " %d  k%d  %dm" % (self.score, self.kills, int(self.dist / 4))
+        b.put(1, b.h - 1, hud, WHT)
+
+        # Munition: rechtsbuendig, kuerzt sich bei schmalem Fenster
+        if self.reload_t > 0:
+            filled = int(round((1.0 - self.reload_t / RELOAD_TIME) * 10))
+            if b.w >= 74:
+                am = "RELOAD [%s] %.1fs" % ("#" * filled + "." * (10 - filled),
+                                            self.reload_t)
+            else:
+                am = "RELOAD %.1fs" % self.reload_t
+            acol = RED
+        else:
+            acol = GRN if self.ammo > 3 else YEL
             bar = "|" * self.ammo + "." * (MAG_SIZE - self.ammo)
-            b.put(ax, H - 1, "piu [%s] %2d  %2ds" % (bar, self.ammo, int(self.mag_t)), col)
+            if b.w >= 74:
+                am = "piu [%s] %2d  %2ds" % (bar, self.ammo, int(self.mag_t))
+            elif b.w >= 58:
+                am = "piu [%s]" % bar
+            else:
+                am = "piu %d" % self.ammo
+        b.put(b.w - len(am) - 1, b.h - 1, am, acol)
 
         if self.click_t > 0:
             b.put(PX + HERO_W, prow, " *klick*", RED)
@@ -780,6 +888,8 @@ def main():
     ap.add_argument("--name", default=None)
     ap.add_argument("--scores", action="store_true")
     ap.add_argument("--demo", type=int, default=0, help="Autoplay N Frames (Test)")
+    ap.add_argument("--size", default=None,
+                    help="feste Spielfeldgroesse statt automatisch, z.B. 100x30")
     a = ap.parse_args()
 
     if a.scores:
@@ -792,6 +902,16 @@ def main():
             os.system("title PIU PIU")
         except Exception:
             pass
+
+    if a.size:
+        try:
+            cw, ch = a.size.lower().split("x")
+            set_size(int(cw), int(ch))
+        except Exception:
+            print("--size braucht die Form BREITExHOEHE, z.B. 100x30")
+            return
+    else:
+        fit()
 
     snd = Snd(a.silent)
     keys = Keys()
@@ -810,7 +930,17 @@ def main():
                     return
                 keys.flush()
                 blink = 0
+                fit()
+                out(CLEAR)
                 while True:
+                    if fit():
+                        out(CLEAR)
+                    if TOO_SMALL:
+                        draw_too_small()
+                        if keys.get() == "quit":
+                            return
+                        time.sleep(0.25)
+                        continue
                     draw_start((blink // 5) % 2 == 0, best())
                     k = keys.get()
                     if k == "quit":
@@ -856,6 +986,14 @@ def main():
                             keys.wait_any()
                         elif k == "quit":
                             return
+                if not demo:
+                    if fit():
+                        g.on_resize()
+                        out(CLEAR)
+                    if TOO_SMALL:
+                        draw_too_small()
+                        time.sleep(0.25)
+                        continue
                 g.step()
                 g.draw(best())
                 time.sleep(0.055)
@@ -872,11 +1010,15 @@ def main():
             draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores)
             keys.flush()
             while True:
-                k = keys.wait_any()
+                if fit():
+                    out(CLEAR)
+                    draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores)
+                k = keys.get()
                 if k == "quit":
                     return
                 if k in ("jump", "shoot"):
                     break
+                time.sleep(0.05)
             out(CLEAR)
     except KeyboardInterrupt:
         pass
