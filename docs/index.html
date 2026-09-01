@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PIU PIU 😈 — ASCII Runner</title>
+<title>PIU PIU (ง•_•)ง — ASCII Runner</title>
 <meta name="description" content="Ein ASCII-Endlosrunner fürs Terminal. Du rennst, springst und machst piu piu.">
 <style>
   :root{
@@ -55,7 +55,7 @@
 | |_) | | | | | |   | |_) | | | | | |
 |  __/| | | |_| |   |  __/| | | |_| |
 |_|   |_|  \___/    |_|    |_|  \___/</pre>
-<div class="tag">😈 der teufel rennt und ballert</div>
+<div class="tag">(ง•_•)ง renn. spring. mach piu piu.</div>
 </header>
 
 <div class="card">
@@ -92,7 +92,7 @@ python piuu.py</pre>
 <h2>▸ Was passiert da</h2>
 <div class="card">
 <ul>
-<li>Ein 😈 rennt durch eine scrollende ASCII-Landschaft</li>
+<li>Ein Kaomoji-Männchen <span class="g">(ง•_•)ง</span> rennt durch eine scrollende ASCII-Landschaft — mit eigenen Posen für Laufen, Springen <span class="g">\(•o•)/</span>, Fallen, Ducken <span class="g">(&gt;_&lt;)__</span> und Sterben <span class="r">~(X_X)~</span></li>
 <li>Hindernisse: Kakteen, Felsen, Spikes <span class="g">/_\</span>, Vögel <span class="r">~o&gt;</span></li>
 <li>Manchmal ist das Wort <span class="m">piu</span> selbst das Hindernis</li>
 <li>Im Himmel treiben Sprüche vorbei: <span class="d">hast du aslok haare? · ik maken piu piu · autsch* · und du nie wieder aslok haare</span></li>
@@ -100,7 +100,7 @@ python piuu.py</pre>
 </ul>
 </div>
 
-<footer>PIU PIU 😈 · MIT · piu piu. und du nie wieder aslok haare.</footer>
+<footer>PIU PIU (ง•_•)ง · MIT · piu piu. und du nie wieder aslok haare.</footer>
 </div>
 
 <script>
@@ -114,6 +114,9 @@ const CACTUS=["  _  "," | | ","_|_|_"], CACTUS_L=[" _ _ ","| | |","|_|_|","  |  
 const ROCK=[" __ ","/  \\","\\__/"], SPIKE=["/\\","/_\\"];
 const BIRD_A=["~o>"," ^ "], BIRD_B=["~o>"," v "];
 const BOOM=["piu!","autsch*","weg damit","piu piu"];
+const HERO_W=7, HERO={
+  run:["(ง•_•)ง","ᕦ(•_•)ᕤ"], jump:["\\(•o•)/"], fall:["/(•_•)\\"],
+  duck:["(>_<)__"], shoot:["(ง•_•)="], dead:["~(X_X)~"]};
 const TITLE=[" ____  _   _   _     ____  _   _   _ ",
 "|  _ \\| | | | | |   |  _ \\| | | | | |",
 "| |_) | | | | | |   | |_) | | | | | |",
@@ -158,7 +161,7 @@ Buf.prototype.render=function(){ let o='';
 
 let state='start', g=null, blink=0, hs=+(localStorage.getItem('piu_hs')||0), goData=null;
 
-function newGame(){ return {y:0,vy:0,jumps:0,duck:0,obs:[],bul:[],bg:(function(){
+function newGame(){ return {y:0,vy:0,jumps:0,duck:0,shootT:0,obs:[],bul:[],bg:(function(){
     const rows=[];while(rows.length<3){const r=2+ri(GROUND-7);if(rows.indexOf(r)<0)rows.push(r);}
     return rows.map(r=>[Math.random()*W,r,pick(PHRASES)]);})(),
   clouds:[[Math.random()*W,ri(2)]],parts:[],dist:0,score:0,kills:0,spawn:20,dead:false,msg:'',msgT:0}; }
@@ -176,7 +179,7 @@ function mkObs(lvl){ let pool=['cactus','cactus','rock','word','spike'];
 function jump(){ if(g&&g.jumps<2){g.vy=g.jumps===0?1.5:1.3;g.jumps++;g.duck=0;sJump();} }
 function duck(){ if(!g)return; if(g.y<=.01)g.duck=8; else g.vy-=.9; }
 function shoot(){ if(!g)return; let by=GROUND-1-Math.round(g.y); if(g.duck)by=GROUND-1;
-  g.bul.push([PX+2,by]); sPiu(); }
+  g.bul.push([PX+HERO_W-1,by]); g.shootT=4; sPiu(); }
 
 function rowsOf(o){ const b=GROUND-1-o.off; return [b-o.art.length+1,b]; }
 
@@ -186,6 +189,7 @@ function step(){
   g.vy-=.16; g.y+=g.vy;
   if(g.y<=0){g.y=0;g.vy=0;g.jumps=0;}
   if(g.duck)g.duck--;
+  if(g.shootT>0)g.shootT--;
 
   g.bg.forEach(p=>p[0]-=sp*.35);
   g.bg=g.bg.filter(p=>p[0]+p[2].length>0);
@@ -222,10 +226,21 @@ function step(){
 
   const pr=GROUND-1-Math.round(g.y);
   for(const o of g.obs){ const [t,bo]=rowsOf(o);
-    if(o.x+o.w-1<PX-0.2||o.x>PX+1.2)continue;
+    if(o.x+o.w-1<PX+0.8||o.x>PX+HERO_W-3.2)continue;
     if(pr>=t&&pr<=bo){g.dead=true;return;} }
 }
 
+function heroPose(){
+  if(g.dead)return HERO.dead[0];
+  if(g.duck)return HERO.duck[0];
+  if(g.shootT>0)return HERO.shoot[0];
+  if(g.y>.3)return g.vy>0?HERO.jump[0]:HERO.fall[0];
+  return HERO.run[Math.floor(g.dist/2)%2];
+}
+function heroCol(){
+  if(g.dead)return 'r'; if(g.shootT>0)return 'y';
+  if(g.duck)return 'c'; return 'g';
+}
 function draw(){
   const b=new Buf();
   g.clouds.forEach(c=>CLOUD.forEach((r,i)=>b.put(c[0],c[1]+i,r,'d')));
@@ -235,8 +250,8 @@ function draw(){
     b.art(o.x,GROUND-1-o.off,o.kind==='bird'?(o.f<4?BIRD_A:BIRD_B):o.art,col); });
   g.bul.forEach(bl=>b.put(bl[0],bl[1],'-=','y'));
   const pr=GROUND-1-Math.round(g.y);
-  if(g.duck) b.put(PX,GROUND-1,'👿','r');
-  else { b.put(PX,pr,'😈',null); if(g.y>.3)b.put(PX,pr+1,'^','d'); }
+  b.put(PX,pr,heroPose(),heroCol());
+  if(g.y>.3&&!g.duck)b.put(PX+2,pr+1,'^','d');
   b.put(0,GROUND,'_'.repeat(W),'d');
   const pat='^~-_'; let gl='';
   for(let x=0;x<W;x++)gl+=pat[(x+Math.floor(g.dist))%4];
@@ -249,10 +264,10 @@ function draw(){
 function drawStart(){
   const b=new Buf();
   TITLE.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'c'));
-  b.put((W-28)/2,7,'der teufel rennt und ballert','d');
-  b.put(7,9,'😈',null); b.put(11,9,'- - -','y');
-  b.put(19,9,'piu piu','m'); b.put(31,9,'~o>','r');
-  b.put(39,9,' _ ','g'); b.put(39,10,'|_|','g');
+  b.put((W-27)/2,7,'renn. spring. mach piu piu.','d');
+  b.put(5,9,HERO.run[0],'g'); b.put(14,9,'- - -','y');
+  b.put(21,9,'piu piu','m'); b.put(32,9,'~o>','r');
+  b.put(40,9,' _ ','g'); b.put(40,10,'|_|','g');
   b.put(0,11,'^'.repeat(W),'d');
   const btn=(blink>>2)%2===0?'[ START ]':'[       ]';
   b.put((W-btn.length)/2,13,btn,'g');
@@ -264,10 +279,11 @@ function drawStart(){
 function drawGO(){
   const b=new Buf();
   GO.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'r'));
-  b.put((W-7)/2,6,'autsch*','y');
+  b.put((W-7)/2,6,HERO.dead[0],'r');
+  b.put((W-7)/2,7,'autsch*','y');
   const m='score '+goData.s+'   kills '+goData.k+'   strecke '+goData.d+'m';
-  b.put((W-m.length)/2,7,m,'w');
-  if(goData.rec)b.put((W-21)/2,8,'*** NEUER REKORD! ***','m');
+  b.put((W-m.length)/2,8,m,'w');
+  if(goData.rec)b.put((W-21)/2,9,'*** NEUER REKORD! ***','m');
   b.put((W-17)/2,10,'-- hall of piu --','c');
   b.put((W-15)/2,12,'best: '+hs,'g');
   const t=(blink>>2)%2===0?'LEERTASTE = nochmal':'                   ';

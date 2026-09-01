@@ -3,7 +3,7 @@
 """
 PIU PIU - ein ASCII-Endlosrunner fuers Windows-Terminal.
 
-Du bist ein kleiner Teufel. Du rennst. Du springst. Du machst piu piu.
+Ein kleines Kaomoji-Maennchen. Es rennt. Es springt. Es macht piu piu.
 
     LEERTASTE / W / PFEIL HOCH  = springen (2x fuer Doppelsprung)
     S / PFEIL RUNTER            = ducken
@@ -57,9 +57,26 @@ H = 18          # Spielfeldhoehe
 GROUND = H - 4  # Zeile der Bodenlinie
 PX = 6          # Spieler-x
 
-HERO = "\U0001f608"      # 😈
-HERO_FALLBACK = "@>"
-DUCK = "\U0001f47f"      # 👿
+# ---------------- Der Held (Kaomoji-Maennchen) ----------------
+# Alle Posen sind gleich breit, damit nichts wackelt.
+HERO_W = 7
+
+HERO_KAO = {
+    "run":   ["(\u0e07\u2022_\u2022)\u0e07", "\u1566(\u2022_\u2022)\u1564"],
+    "jump":  ["\\(\u2022o\u2022)/"],
+    "fall":  ["/(\u2022_\u2022)\\"],
+    "duck":  ["(>_<)__"],
+    "shoot": ["(\u0e07\u2022_\u2022)="],
+    "dead":  ["~(X_X)~"],
+}
+HERO_ASCII = {
+    "run":   ["(o_o)/ ", "(o_o)\\ "],
+    "jump":  ["\\(o_o)/"],
+    "fall":  ["/(o_o)\\"],
+    "duck":  ["(>_<)__"],
+    "shoot": ["(o_o)=>"],
+    "dead":  ["~(x_x)~"],
+}
 
 SCORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "piu_highscores.json")
 
@@ -336,10 +353,10 @@ def draw_start(sel_blink, hs):
     b = Buf()
     for i, row in enumerate(TITLE):
         b.put((W - len(row)) // 2, 1 + i, row, CYN)
-    b.put((W - 30) // 2, 7, "der teufel rennt und ballert", DIM)
+    b.put((W - 28) // 2, 7, "renn. spring. mach piu piu.", DIM)
 
-    b.put(8, 9, HERO, None, wide=True)
-    b.put(12, 9, "- - -", YEL)
+    b.put(6, 9, HERO_KAO["run"][0], GRN)
+    b.put(14, 9, "- - -", YEL)
     b.put(20, 9, "piu piu", MAG)
     b.put(32, 9, "~o>", RED)
     b.put(40, 9, " _  ", GRN)
@@ -367,18 +384,20 @@ def draw_gameover(score, kills, dist, rank, scores):
     b = Buf()
     for i, row in enumerate(GAMEOVER):
         b.put((W - len(row)) // 2, 1 + i, row, RED)
-    b.put((W - 24) // 2, 6, "autsch*", YEL)
+    kao = HERO_KAO["dead"][0]
+    b.put((W - len(kao)) // 2, 6, kao, RED)
+    b.put((W - 7) // 2, 7, "autsch*", YEL)
     msg = "score %d   kills %d   strecke %dm" % (score, kills, dist)
-    b.put((W - len(msg)) // 2, 7, msg, WHT)
+    b.put((W - len(msg)) // 2, 8, msg, WHT)
     if rank == 1:
-        b.put((W - 22) // 2, 8, "*** NEUER REKORD! ***", MAG)
+        b.put((W - 21) // 2, 9, "*** NEUER REKORD! ***", MAG)
     elif rank:
-        b.put((W - 18) // 2, 8, "platz %d der liste" % rank, GRN)
+        b.put((W - 18) // 2, 9, "platz %d der liste" % rank, GRN)
 
-    b.put((W - 22) // 2, 10, "-- hall of piu --", CYN)
-    for i, e in enumerate(scores[:5]):
+    b.put((W - 17) // 2, 11, "-- hall of piu --", CYN)
+    for i, e in enumerate(scores[:4]):
         row = "%d. %-14s %6d" % (i + 1, e.get("name", "?"), e.get("score", 0))
-        b.put((W - len(row)) // 2, 11 + i, row, GRN if (i + 1) == rank else DIM)
+        b.put((W - len(row)) // 2, 12 + i, row, GRN if (i + 1) == rank else DIM)
     b.put((W - 34) // 2, 16, "LEERTASTE = nochmal    Q = ende", YEL)
     out(HOME + b.render())
 
@@ -398,6 +417,7 @@ class Game:
         self.vy = 0.0
         self.jumps = 0
         self.ducking = 0
+        self.shoot_t = 0
         self.obs = []
         self.bul = []
         self.bg = []
@@ -435,7 +455,8 @@ class Game:
         by = GROUND - 1 - int(self.y)
         if self.ducking:
             by = GROUND - 1
-        self.bul.append([PX + 2.0, by])
+        self.bul.append([PX + HERO_W - 1.0, by])
+        self.shoot_t = 4
         self.snd.piu()
 
     # ---- Physik / Logik ----
@@ -454,6 +475,8 @@ class Game:
             self.jumps = 0
         if self.ducking:
             self.ducking -= 1
+        if self.shoot_t > 0:
+            self.shoot_t -= 1
 
         # Hintergrund-Saetze (Parallax)
         for p in self.bg:
@@ -532,8 +555,7 @@ class Game:
 
     def _player_hits(self):
         prow = GROUND - 1 - int(round(self.y))
-        pw = 2 if self.wide else 2
-        px0, px1 = PX, PX + pw - 1
+        px0, px1 = PX + 1, PX + HERO_W - 3
         for o in self.obs:
             top, bot = self._rows_of(o)
             ox0, ox1 = o["x"], o["x"] + o["w"] - 1
@@ -542,6 +564,29 @@ class Game:
             if top <= prow <= bot:
                 self.dead = True
                 return
+
+    # ---- Held ----
+    def hero_pose(self):
+        k = HERO_KAO if self.wide else HERO_ASCII
+        if self.dead:
+            return k["dead"][0]
+        if self.ducking:
+            return k["duck"][0]
+        if self.shoot_t > 0:
+            return k["shoot"][0]
+        if self.y > 0.3:
+            return k["jump"][0] if self.vy > 0 else k["fall"][0]
+        run = k["run"]
+        return run[(self.t // 3) % len(run)]
+
+    def hero_col(self):
+        if self.dead:
+            return RED
+        if self.shoot_t > 0:
+            return YEL
+        if self.ducking:
+            return CYN
+        return GRN
 
     # ---- Zeichnen ----
     def draw(self, hs):
@@ -565,12 +610,9 @@ class Game:
             b.put(int(bl[0]), bl[1], "-=", YEL)
 
         prow = GROUND - 1 - int(round(self.y))
-        if self.ducking:
-            b.put(PX, GROUND - 1, DUCK if self.wide else "-@", RED, wide=self.wide)
-        else:
-            b.put(PX, prow, HERO if self.wide else HERO_FALLBACK, None, wide=self.wide)
-            if self.y > 0.3:
-                b.put(PX, prow + 1, "^", DIM)
+        b.put(PX, prow, self.hero_pose(), self.hero_col())
+        if self.y > 0.3 and not self.ducking:
+            b.put(PX + 2, prow + 1, "^", DIM)
 
         # Boden
         pat = "^~-_" 

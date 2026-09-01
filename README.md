@@ -1,6 +1,6 @@
-# PIU PIU 😈
+# PIU PIU (ง•_•)ง
 
-> Ein ASCII-Endlosrunner fürs Terminal. Du bist ein kleiner Teufel. Du rennst. Du springst. Du machst piu piu.
+> Ein ASCII-Endlosrunner fürs Terminal. Ein kleines Kaomoji-Männchen rennt, springt und macht piu piu.
 
 ```
  ____  _   _   _     ____  _   _   _
@@ -30,9 +30,25 @@ python piuu.py
 | `P` | Pause |
 | `Q` / `STRG+C` | beenden |
 
+## Der Held
+
+Ein Kaomoji-Männchen mit eigener Pose für jeden Zustand (alle exakt 7 Zeichen breit,
+damit nichts wackelt):
+
+| Zustand | Pose |
+|---|---|
+| rennen | `(ง•_•)ง` ↔ `ᕦ(•_•)ᕤ` (animiert) |
+| springen | `\(•o•)/` |
+| fallen | `/(•_•)\` |
+| ducken | `(>_<)__` |
+| schießen | `(ง•_•)=` |
+| tot | `~(X_X)~` |
+
+Mit `--ascii` gibt's die reine ASCII-Variante `(o_o)/` für alte Terminals.
+
 ## Was passiert da
 
-- Ein 😈 rennt durch eine scrollende ASCII-Landschaft
+- Das Männchen rennt durch eine scrollende ASCII-Landschaft
 - Hindernisse: Kakteen `|_|`, Felsen `/  \`, Spikes `/_\`, fliegende Vögel `~o>`
 - **Manchmal ist das Wort `piu` selbst das Hindernis** — überspringen oder wegballern
 - Im Himmel treiben Sprüche vorbei:
@@ -45,7 +61,7 @@ python piuu.py
 
 ```
 python piuu.py --silent        # ohne Ton
-python piuu.py --ascii         # kein Emoji, Held wird @>
+python piuu.py --ascii         # reines ASCII-Maennchen (o_o)/
 python piuu.py --speed 0.7     # gemütlicher
 python piuu.py --name Kevin    # Name für den Highscore
 python piuu.py --scores        # Hall of Piu anzeigen
@@ -74,7 +90,7 @@ Die Seite liegt in `docs/`. Auf GitHub aktivieren unter
 ## Hinweise
 
 Läuft am besten im **Windows Terminal** (Emoji + ANSI-Farben).
-In der alten `cmd.exe` sieht 😈 evtl. kaputt aus — dann `--ascii` benutzen.
+In der alten `cmd.exe` sehen die Kaomoji evtl. kaputt aus — dann `--ascii` benutzen.
 Terminal sollte mindestens **80×20** Zeichen groß sein.
 
 ## Lizenz
