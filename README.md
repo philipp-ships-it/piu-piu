@@ -114,8 +114,8 @@ Feste Größe erzwingen: `python piuu.py --size 100x30`
 
 ## Spielername
 
-Der Name für den Highscore kommt aus deiner Umgebung (`%USERNAME%` unter
-Windows, `$USER` unter Linux/macOS) — nichts ist im Code hinterlegt.
+Der Name für den Highscore kommt aus deiner Umgebung (`%philipp-ships-itNAME%` unter
+Windows, `$philipp-ships-it` unter Linux/macOS) — nichts ist im Code hinterlegt.
 Überschreiben mit `--name Kevin`.
 
 ## Optionen
