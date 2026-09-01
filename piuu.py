@@ -7,7 +7,7 @@ Ein kleines Kaomoji-Maennchen. Es rennt. Es springt. Es macht piu piu.
 
     LEERTASTE / W / PFEIL HOCH  = springen (2x fuer Doppelsprung)
     S / PFEIL RUNTER            = ducken
-    ENTER                       = piu piu schiessen
+    ENTER                       = piu piu schiessen (10 Schuss pro Magazin)
     P                           = Pause
     Q / STRG+C                  = beenden
 
@@ -16,6 +16,7 @@ Start:  python piu.py
 
 import argparse
 import json
+import math
 import os
 import random
 import sys
@@ -78,6 +79,11 @@ HERO_ASCII = {
     "dead":  ["~(x_x)~"],
 }
 
+MAG_SIZE = 10          # Schuss pro Magazin
+MAG_WINDOW = 30.0      # Sekunden bis das Magazin sich selbst auffrischt
+RELOAD_TIME = 5.0      # Sekunden Nachladen wenn leergeballert
+FPS = 18.0             # Frames pro Sekunde (Frame = 1/FPS Sekunden)
+
 SCORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "piu_highscores.json")
 
 # ---------------- Hintergrund-Spruechle ----------------
@@ -103,35 +109,89 @@ CLOUDS = [
 ]
 
 # ---------------- Hindernisse ----------------
-CACTUS_S = ["  _  ", " | | ", "_|_|_"]
-CACTUS_L = [" _ _ ", "| | |", "|_|_|", "  |  "]
-ROCK = [" __ ", "/  \\", "\\__/"]
-WORD_PIU = ["piu"]
-WORD_PIUPIU = ["piu piu"]
-SPIKE = ["/\\", "/_\\"]
-BIRD_A = ["~o>", " ^ "]
-BIRD_B = ["~o>", " v "]
+# Kleine Kakteen
+CACTUS_S  = ["  _  ", " | | ", "_|_|_"]
+CACTUS_L  = [" _ _ ", "| | |", "|_|_|", "  |  "]
+CACTUS_XL = [" _ _ _ ", "| | | |", "|_|_|_|", "   |   ", "   |   "]
+
+# Steine / Geroell
+ROCK      = [" __ ", "/  \\", "\\__/"]
+ROCK_BIG  = ["  ___  ", " /   \\ ", "/     \\", "\\_____/"]
+PEBBLES   = ["o O o"]
+
+# Spikes
+SPIKE     = ["/\\", "/_\\"]
+SPIKE_2   = ["/\\/\\", "/__ _\\"]
+SPIKE_3   = ["/\\/\\/\\", "/_ _ _\\"]
+
+# Sonstiger Kram am Boden
+BARREL    = [",---.", "|###|", "|###|", "`---'"]
+CRATE     = ["+---+", "|\\ /|", "|/ \\|", "+---+"]
+FENCE     = ["|-|-|", "|-|-|", "|_|_|"]
+TOMBSTONE = [" ___ ", "/RIP\\", "|   |", "|___|"]
+BUSH      = [" %%% ", "%%%%%", " \\|/ "]
+MUSHROOM  = [" .-. ", "(ooo)", " |_| "]
+TRASHCAN  = ["[___]", "|:::|", "|:::|", "|___|"]
+SNOWMAN   = [" (o) ", "(   )", "(   )"]
+PYRAMID   = ["  ^  ", " /-\\ ", "/---\\"]
+
+# Fliegendes Zeug (2 Frames fuer Animation)
+BIRD_A    = ["~o>", " ^ "]
+BIRD_B    = ["~o>", " v "]
+BAT_A     = ["/\\o/\\"]
+BAT_B     = ["_o_"]
+UFO_A     = [" .-. ", "(-o-)", "'* *'"]
+UFO_B     = [" .-. ", "(-o-)", "* * *"]
+DRONE_A   = ["[+]", "/ \\"]
+DRONE_B   = ["[+]", "\\ /"]
+GHOST_A   = [".oOo.", "(o o)", " ~~~ "]
+GHOST_B   = [".oOo.", "(o o)", " www "]
+
+# Wort-Hindernisse
+WORDS_LOW  = ["piu", "piu piu", "PIU", "autsch*", "piu!"]
+WORDS_HIGH = ["piu piu piu", "aslok", "haare", "PIU PIU", "nope"]
+
+# (art_a, art_b, kind, offset_choices, min_level, gewicht)
+CATALOG = [
+    (CACTUS_S,   None,    "solid", [0],    0, 10),
+    (ROCK,       None,    "solid", [0],    0, 8),
+    (SPIKE,      None,    "solid", [0],    0, 7),
+    (PEBBLES,    None,    "solid", [0],    0, 4),
+    (BUSH,       None,    "solid", [0],    0, 5),
+    (CACTUS_L,   None,    "solid", [0],    1, 7),
+    (CRATE,      None,    "solid", [0],    1, 5),
+    (MUSHROOM,   None,    "solid", [0],    1, 4),
+    (SPIKE_2,    None,    "solid", [0],    1, 5),
+    (BIRD_A,     BIRD_B,  "bird",  [3, 4], 1, 7),
+    (BARREL,     None,    "solid", [0],    2, 5),
+    (FENCE,      None,    "solid", [0],    2, 4),
+    (TRASHCAN,   None,    "solid", [0],    2, 4),
+    (BAT_A,      BAT_B,   "bird",  [4, 5], 2, 5),
+    (SPIKE_3,    None,    "solid", [0],    3, 5),
+    (TOMBSTONE,  None,    "solid", [0],    3, 4),
+    (PYRAMID,    None,    "solid", [0],    3, 4),
+    (DRONE_A,    DRONE_B, "bird",  [3, 5], 3, 5),
+    (CACTUS_XL,  None,    "solid", [0],    4, 5),
+    (SNOWMAN,    None,    "solid", [0],    4, 3),
+    (GHOST_A,    GHOST_B, "bird",  [3, 4], 4, 4),
+    (UFO_A,      UFO_B,   "bird",  [4, 5], 5, 4),
+]
 
 
 def make_obstacle(level):
-    """Liefert (art, kind, y_offset). y_offset = Zeilen ueber dem Boden."""
-    pool = ["cactus", "cactus", "rock", "word", "spike"]
-    if level >= 2:
-        pool += ["bird", "word"]
-    if level >= 4:
-        pool += ["bird", "cactus_l"]
-    kind = random.choice(pool)
-    if kind == "cactus":
-        return list(CACTUS_S), "solid", 0
-    if kind == "cactus_l":
-        return list(CACTUS_L), "solid", 0
-    if kind == "rock":
-        return list(ROCK), "solid", 0
-    if kind == "spike":
-        return list(SPIKE), "solid", 0
-    if kind == "bird":
-        return list(BIRD_A), "bird", random.choice([3, 4])
-    return list(random.choice([WORD_PIU, WORD_PIUPIU])), "word", 0
+    """Liefert dict mit art/art2/kind/off - gewichtet nach Level."""
+    # Woerter kommen extra oft
+    if random.random() < 0.16:
+        hi = level >= 2 and random.random() < 0.5
+        w = random.choice(WORDS_HIGH if hi else WORDS_LOW)
+        return {"art": [w], "art2": None, "kind": "word",
+                "off": random.choice([3, 4]) if hi else 0}
+
+    opts = [c for c in CATALOG if c[4] <= level]
+    weights = [c[5] for c in opts]
+    a, b, kind, offs, _, _ = random.choices(opts, weights=weights)[0]
+    return {"art": list(a), "art2": (list(b) if b else None),
+            "kind": kind, "off": random.choice(offs)}
 
 
 # ---------------- Sound ----------------
@@ -171,6 +231,24 @@ class Snd:
             return
         beep(900, 12)
         beep(400, 22)
+
+    def click(self):
+        if self.silent:
+            return
+        beep(150, 18)
+        beep(90, 14)
+
+    def empty(self):
+        if self.silent:
+            return
+        beep(400, 40)
+        beep(260, 60)
+
+    def reload_done(self):
+        if self.silent:
+            return
+        beep(700, 40)
+        beep(1050, 55)
 
     def start(self):
         if self.silent:
@@ -367,8 +445,9 @@ def draw_start(sel_blink, hs):
     btn = "[ START ]" if sel_blink else "[        ]"
     b.put((W - len(btn)) // 2, 13, btn, GRN)
     b.put((W - 46) // 2, 15, "LEER=springen  ENTER=piu piu  S=ducken  Q=ende", DIM)
+    b.put((W - 40) // 2, 16, "10 schuss / 30s   danach 5s nachladen", DIM)
     if hs:
-        b.put((W - 20) // 2, 16, "bestleistung: %d" % hs, YEL)
+        b.put((W - 20) // 2, 17, "bestleistung: %d" % hs, YEL)
     out(HOME + b.render())
 
 
@@ -418,6 +497,10 @@ class Game:
         self.jumps = 0
         self.ducking = 0
         self.shoot_t = 0
+        self.ammo = MAG_SIZE
+        self.reload_t = 0.0      # >0 = laedt gerade nach
+        self.mag_t = MAG_WINDOW  # Restzeit des 30s-Fensters
+        self.click_t = 0         # "klick" Anzeige bei leerem Magazin
         self.obs = []
         self.bul = []
         self.bg = []
@@ -452,17 +535,29 @@ class Game:
             self.vy -= 0.9   # schnell runter
 
     def shoot(self):
+        if self.reload_t > 0 or self.ammo <= 0:
+            if self.click_t <= 0:
+                self.snd.click()
+            self.click_t = 10
+            return
         by = GROUND - 1 - int(self.y)
         if self.ducking:
             by = GROUND - 1
         self.bul.append([PX + HERO_W - 1.0, by])
         self.shoot_t = 4
+        self.ammo -= 1
         self.snd.piu()
+        if self.ammo == 0:
+            self.reload_t = RELOAD_TIME
+            self.snd.empty()
 
     # ---- Physik / Logik ----
     def step(self):
         self.t += 1
-        self.speed = min(2.6, 1.0 + self.dist / 900.0) * self.sm
+        # Grundtempo waechst mit der Strecke, dazu eine sanfte Welle
+        base = 0.95 + 1.75 * (1.0 - math.exp(-self.dist / 1400.0))
+        wave = 0.12 * math.sin(self.t / 47.0) + 0.07 * math.sin(self.t / 13.0)
+        self.speed = max(0.7, (base + wave)) * self.sm
         self.dist += self.speed
         self.score = int(self.dist / 3) + self.kills * 25
 
@@ -477,6 +572,25 @@ class Game:
             self.ducking -= 1
         if self.shoot_t > 0:
             self.shoot_t -= 1
+        if self.click_t > 0:
+            self.click_t -= 1
+
+        # Munition: Reload-Countdown bzw. 30s-Fenster
+        dt = 1.0 / FPS
+        if self.reload_t > 0:
+            self.reload_t -= dt
+            if self.reload_t <= 0:
+                self.reload_t = 0.0
+                self.ammo = MAG_SIZE
+                self.mag_t = MAG_WINDOW
+                self.snd.reload_done()
+        else:
+            self.mag_t -= dt
+            if self.mag_t <= 0:
+                if self.ammo < MAG_SIZE:
+                    self.ammo = MAG_SIZE
+                    self.snd.reload_done()
+                self.mag_t = MAG_WINDOW
 
         # Hintergrund-Saetze (Parallax)
         for p in self.bg:
@@ -500,16 +614,29 @@ class Game:
             if o["kind"] == "bird":
                 o["x"] -= self.speed * 0.25
                 o["f"] = (o.get("f", 0) + 1) % 8
+                o["h"] = len(o["art2"] if (o["art2"] and o["f"] >= 4) else o["art"])
         self.obs = [o for o in self.obs if o["x"] + o["w"] > 0]
 
         self.spawn -= self.speed
         if self.spawn <= 0:
-            art, kind, off = make_obstacle(int(self.dist / 400))
-            self.obs.append({"x": float(W + 2), "art": art, "kind": kind,
-                             "off": off, "w": max(len(r) for r in art),
-                             "h": len(art), "f": 0})
-            gap = random.randint(26, 46) - int(self.dist / 260)
-            self.spawn = max(17, gap)
+            lvl = int(self.dist / 400)
+            m = make_obstacle(lvl)
+            art = m["art"]
+            self.obs.append({"x": float(W + 2), "art": art, "art2": m["art2"],
+                             "kind": m["kind"], "off": m["off"],
+                             "w": max(len(r) for r in art),
+                             "h": len(art), "f": random.randint(0, 7)})
+            # Abstand: skaliert mit Tempo (Reaktionszeit bleibt fair),
+            # dazu Rhythmus-Variation und gelegentliche Doppel-/Ruhepausen
+            react = 15.0 + 9.0 * self.speed
+            jitter = random.uniform(0.75, 1.65)
+            gap = react * jitter
+            r = random.random()
+            if r < 0.14 and lvl >= 1:
+                gap = react * 0.55            # Doppelschlag
+            elif r > 0.93:
+                gap = react * 2.4             # Verschnaufpause
+            self.spawn = max(13.0, gap)
 
         # Schuesse
         for bl in self.bul:
@@ -602,8 +729,8 @@ class Game:
         for o in self.obs:
             col = MAG if o["kind"] == "word" else (RED if o["kind"] == "bird" else GRN)
             art = o["art"]
-            if o["kind"] == "bird":
-                art = BIRD_A if o["f"] < 4 else BIRD_B
+            if o["art2"] and o["f"] >= 4:
+                art = o["art2"]
             b.art(int(o["x"]), GROUND - 1 - o["off"], art, col)
 
         for bl in self.bul:
@@ -620,10 +747,25 @@ class Game:
         b.put(0, GROUND, "_" * W, DIM)
         b.put(0, GROUND + 1, gline, DIM)
 
-        hud = " score %5d   best %5d   kills %2d   %4dm " % (
-            self.score, max(hs, self.score), self.kills, int(self.dist / 4))
+        hud = " score %5d  best %5d  kills %2d  %4dm  x%.1f" % (
+            self.score, max(hs, self.score), self.kills,
+            int(self.dist / 4), self.speed)
         b.put(1, H - 1, hud, WHT)
-        b.put(W - 30, H - 1, "LEER=hopp ENTER=piu Q=ende", DIM)
+
+        # Munitionsanzeige
+        ax = W - 26
+        if self.reload_t > 0:
+            frac = 1.0 - (self.reload_t / RELOAD_TIME)
+            filled = int(round(frac * 10))
+            bar = "#" * filled + "." * (10 - filled)
+            b.put(ax, H - 1, "RELOAD [%s] %.1fs" % (bar, self.reload_t), RED)
+        else:
+            col = GRN if self.ammo > 3 else YEL
+            bar = "|" * self.ammo + "." * (MAG_SIZE - self.ammo)
+            b.put(ax, H - 1, "piu [%s] %2d  %2ds" % (bar, self.ammo, int(self.mag_t)), col)
+
+        if self.click_t > 0:
+            b.put(PX + HERO_W, prow, " *klick*", RED)
         if self.msg_t > 0:
             b.put(PX + 4, prow - 1, self.msg, YEL)
         out(HOME + b.render())

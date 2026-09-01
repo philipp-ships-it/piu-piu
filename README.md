@@ -26,7 +26,7 @@ python piuu.py
 |---|---|
 | `LEERTASTE` / `W` / `↑` | springen — **2× für Doppelsprung** |
 | `S` / `↓` | ducken (in der Luft: schnell runter) |
-| `ENTER` | **piu piu** schießen — zerstört Hindernisse |
+| `ENTER` | **piu piu** schießen — 10 Schuss pro Magazin |
 | `P` | Pause |
 | `Q` / `STRG+C` | beenden |
 
@@ -45,6 +45,43 @@ damit nichts wackelt):
 | tot | `~(X_X)~` |
 
 Mit `--ascii` gibt's die reine ASCII-Variante `(o_o)/` für alte Terminals.
+
+## Munition
+
+Ballern ist **begrenzt**:
+
+- **10 Schuss pro Magazin**
+- Das Magazin frischt sich alle **30 Sekunden** von selbst auf
+- Wer leerballert, muss **5 Sekunden nachladen** — solange macht es nur `*klick*`
+- HUD zeigt `piu [||||||....] 6  17s` bzw. `RELOAD [####......] 3.1s`
+
+Also: nicht jedes `piu` zählt, überspringen ist oft schlauer.
+
+## Hindernisse
+
+Über **30 verschiedene ASCII-Hindernisse**, die gewichtet nach Level auftauchen —
+je weiter du kommst, desto exotischer wird es:
+
+```
+  _      __     /\      %%%    .-.     ,---.   +---+    ___
+ | |    /  \    /_\    %%%%%  (ooo)    |###|   |\ /|   /RIP\
+_|_|_   \__/           \|/     |_|     `---'   +---+   |___|
+ Kaktus  Stein  Spike   Busch   Pilz    Fass    Kiste   Grab
+```
+
+Dazu fliegendes Zeug auf verschiedenen Höhen (animiert, 2 Frames):
+Vögel `~o>`, Fledermäuse `/\o/\`, Drohnen `[+]`, Geister `(o o)`, UFOs `(-o-)`.
+
+Und natürlich Wort-Hindernisse: `piu` · `piu piu` · `autsch*` · `aslok` · `haare` · `nope`
+— am Boden oder in der Luft.
+
+## Dynamik
+
+- **Tempo** wächst sanft mit der Strecke (exponentiell gedämpft, x1.0 → x2.7)
+  plus einer Wellen-Modulation, damit es sich nicht monoton anfühlt
+- **Abstände** skalieren mit dem Tempo, damit die Reaktionszeit fair bleibt
+- Dazu Rhythmus-Wechsel: manchmal ein **Doppelschlag**, manchmal eine **Verschnaufpause**
+- Das HUD zeigt den aktuellen Tempo-Multiplikator als `x1.8`
 
 ## Was passiert da
 

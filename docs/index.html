@@ -66,7 +66,8 @@
     <button id="bDuck">DUCKEN (S)</button>
     <button id="bMute">Ton: AN</button>
   </div>
-  <div class="hint">Leertaste = springen (2× Doppelsprung) · Enter = schießen · S = ducken · P = Pause</div>
+  <div class="hint">Leertaste = springen (2× Doppelsprung) · Enter = schießen · S = ducken · P = Pause<br>
+Munition: 10 Schuss pro Magazin, alle 30 s neu — leergeballert = 5 s Reload</div>
 </div>
 
 <h2>▸ Im Terminal spielen</h2>
@@ -96,6 +97,10 @@ python piuu.py</pre>
 <li>Hindernisse: Kakteen, Felsen, Spikes <span class="g">/_\</span>, Vögel <span class="r">~o&gt;</span></li>
 <li>Manchmal ist das Wort <span class="m">piu</span> selbst das Hindernis</li>
 <li>Im Himmel treiben Sprüche vorbei: <span class="d">hast du aslok haare? · ik maken piu piu · autsch* · und du nie wieder aslok haare</span></li>
+<li><b>Begrenzte Munition:</b> 10 Schuss / 30 s, danach 5 s Reload — solange nur <span class="r">*klick*</span></li>
+<li>Über 30 ASCII-Hindernisse: Kakteen, Fässer, Kisten, Gräber, Pilze, Schneemänner, Pyramiden …</li>
+<li>Fliegendes Zeug in mehreren Höhen: <span class="r">~o&gt;</span> Vögel, <span class="r">/\o/\</span> Fledermäuse, <span class="r">[+]</span> Drohnen, <span class="r">(-o-)</span> UFOs, Geister</li>
+<li>Dynamisches Tempo (x1.0 → x2.7) mit Wellen-Modulation, Abstände skalieren mit</li>
 <li>Wolken, Parallax, Explosionspartikel, Hall of Piu</li>
 </ul>
 </div>
@@ -110,13 +115,48 @@ const PHRASES=["piu piu","hast du aslok haare?","ik maken piu piu",
  "und du nie wieder aslok haare","autsch*","piu","piu piu piu",
  "aslok? nie gehoert","PIU!","haare weg. piu."];
 const CLOUD=["   .-~-.   "," (  ___  ) ","  `-...-`  "];
-const CACTUS=["  _  "," | | ","_|_|_"], CACTUS_L=[" _ _ ","| | |","|_|_|","  |  "];
-const ROCK=[" __ ","/  \\","\\__/"], SPIKE=["/\\","/_\\"];
-const BIRD_A=["~o>"," ^ "], BIRD_B=["~o>"," v "];
 const BOOM=["piu!","autsch*","weg damit","piu piu"];
 const HERO_W=7, HERO={
   run:["(ง•_•)ง","ᕦ(•_•)ᕤ"], jump:["\\(•o•)/"], fall:["/(•_•)\\"],
   duck:["(>_<)__"], shoot:["(ง•_•)="], dead:["~(X_X)~"]};
+const CACTUS_S=["  _  "," | | ","_|_|_"],
+      CACTUS_L=[" _ _ ","| | |","|_|_|","  |  "],
+      CACTUS_XL=[" _ _ _ ","| | | |","|_|_|_|","   |   ","   |   "],
+      ROCK=[" __ ","/  \\","\\__/"],
+      ROCK_BIG=["  ___  "," /   \\ ","/     \\","\\_____/"],
+      PEBBLES=["o O o"],
+      SPIKE=["/\\","/_\\"], SPIKE_2=["/\\/\\","/__ _\\"], SPIKE_3=["/\\/\\/\\","/_ _ _\\"],
+      BARREL=[",---.","|###|","|###|","`---'"],
+      CRATE=["+---+","|\\ /|","|/ \\|","+---+"],
+      FENCE=["|-|-|","|-|-|","|_|_|"],
+      TOMB=[" ___ ","/RIP\\","|   |","|___|"],
+      BUSH=[" %%% ","%%%%%"," \\|/ "],
+      MUSH=[" .-. ","(ooo)"," |_| "],
+      TRASH=["[___]","|:::|","|:::|","|___|"],
+      SNOW=[" (o) ","(   )","(   )"],
+      PYR=["  ^  "," /-\\ ","/---\\"],
+      BIRD_A=["~o>"," ^ "], BIRD_B=["~o>"," v "],
+      BAT_A=["/\\o/\\"], BAT_B=["_o_"],
+      UFO_A=[" .-. ","(-o-)","'* *'"], UFO_B=[" .-. ","(-o-)","* * *"],
+      DRONE_A=["[+]","/ \\"], DRONE_B=["[+]","\\ /"],
+      GHOST_A=[".oOo.","(o o)"," ~~~ "], GHOST_B=[".oOo.","(o o)"," www "];
+const WORDS_LOW=["piu","piu piu","PIU","autsch*","piu!"],
+      WORDS_HIGH=["piu piu piu","aslok","haare","PIU PIU","nope"];
+// [artA, artB, kind, offsets, minLevel, weight]
+const CATALOG=[
+ [CACTUS_S,null,'solid',[0],0,10],[ROCK,null,'solid',[0],0,8],
+ [SPIKE,null,'solid',[0],0,7],[PEBBLES,null,'solid',[0],0,4],
+ [BUSH,null,'solid',[0],0,5],[CACTUS_L,null,'solid',[0],1,7],
+ [CRATE,null,'solid',[0],1,5],[MUSH,null,'solid',[0],1,4],
+ [SPIKE_2,null,'solid',[0],1,5],[BIRD_A,BIRD_B,'bird',[3,4],1,7],
+ [BARREL,null,'solid',[0],2,5],[FENCE,null,'solid',[0],2,4],
+ [TRASH,null,'solid',[0],2,4],[BAT_A,BAT_B,'bird',[4,5],2,5],
+ [SPIKE_3,null,'solid',[0],3,5],[TOMB,null,'solid',[0],3,4],
+ [PYR,null,'solid',[0],3,4],[DRONE_A,DRONE_B,'bird',[3,5],3,5],
+ [CACTUS_XL,null,'solid',[0],4,5],[SNOW,null,'solid',[0],4,3],
+ [GHOST_A,GHOST_B,'bird',[3,4],4,4],[ROCK_BIG,null,'solid',[0],4,4],
+ [UFO_A,UFO_B,'bird',[4,5],5,4]];
+const MAG_SIZE=10, MAG_WINDOW=30, RELOAD_TIME=5, FPS=18;
 const TITLE=[" ____  _   _   _     ____  _   _   _ ",
 "|  _ \\| | | | | |   |  _ \\| | | | | |",
 "| |_) | | | | | |   | |_) | | | | | |",
@@ -143,6 +183,9 @@ const sPiu=()=>tone(1700+ri(400),400,.1),
       sJump=()=>tone(650,1150,.09,'triangle'),
       sKill=()=>tone(800,180,.16,'sawtooth'),
       sHit=()=>{tone(300,70,.4,'sawtooth');setTimeout(()=>tone(180,50,.3),60);},
+      sClick=()=>{tone(150,90,.05,'square');},
+      sEmpty=()=>{tone(400,240,.12,'square');},
+      sReload=()=>{tone(700,1050,.1,'triangle');},
       sGo=()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.09,'triangle'),i*85));
 
 // Buffer
@@ -161,35 +204,51 @@ Buf.prototype.render=function(){ let o='';
 
 let state='start', g=null, blink=0, hs=+(localStorage.getItem('piu_hs')||0), goData=null;
 
-function newGame(){ return {y:0,vy:0,jumps:0,duck:0,shootT:0,obs:[],bul:[],bg:(function(){
+function newGame(){ return {y:0,vy:0,jumps:0,duck:0,shootT:0,t:0,ammo:MAG_SIZE,reloadT:0,magT:MAG_WINDOW,clickT:0,obs:[],bul:[],bg:(function(){
     const rows=[];while(rows.length<3){const r=2+ri(GROUND-7);if(rows.indexOf(r)<0)rows.push(r);}
     return rows.map(r=>[Math.random()*W,r,pick(PHRASES)]);})(),
   clouds:[[Math.random()*W,ri(2)]],parts:[],dist:0,score:0,kills:0,spawn:20,dead:false,msg:'',msgT:0}; }
 
-function mkObs(lvl){ let pool=['cactus','cactus','rock','word','spike'];
-  if(lvl>=2)pool=pool.concat(['bird','word']); if(lvl>=4)pool=pool.concat(['bird','cactus_l']);
-  const k=pick(pool);
-  if(k==='cactus')return{art:CACTUS,kind:'solid',off:0};
-  if(k==='cactus_l')return{art:CACTUS_L,kind:'solid',off:0};
-  if(k==='rock')return{art:ROCK,kind:'solid',off:0};
-  if(k==='spike')return{art:SPIKE,kind:'solid',off:0};
-  if(k==='bird')return{art:BIRD_A,kind:'bird',off:pick([3,4])};
-  return{art:[pick(['piu','piu piu'])],kind:'word',off:0}; }
-
+function mkObs(lvl){
+  if(Math.random()<.16){
+    const hi=lvl>=2&&Math.random()<.5;
+    return {art:[pick(hi?WORDS_HIGH:WORDS_LOW)],art2:null,kind:'word',
+            off:hi?pick([3,4]):0};
+  }
+  const opts=CATALOG.filter(c=>c[4]<=lvl);
+  let tot=0; opts.forEach(c=>tot+=c[5]);
+  let r=Math.random()*tot, c=opts[0];
+  for(const o of opts){ r-=o[5]; if(r<=0){c=o;break;} }
+  return {art:c[0],art2:c[1],kind:c[2],off:pick(c[3])};
+}
 function jump(){ if(g&&g.jumps<2){g.vy=g.jumps===0?1.5:1.3;g.jumps++;g.duck=0;sJump();} }
 function duck(){ if(!g)return; if(g.y<=.01)g.duck=8; else g.vy-=.9; }
-function shoot(){ if(!g)return; let by=GROUND-1-Math.round(g.y); if(g.duck)by=GROUND-1;
-  g.bul.push([PX+HERO_W-1,by]); g.shootT=4; sPiu(); }
+function shoot(){ if(!g)return;
+  if(g.reloadT>0||g.ammo<=0){ if(g.clickT<=0)sClick(); g.clickT=10; return; }
+  let by=GROUND-1-Math.round(g.y); if(g.duck)by=GROUND-1;
+  g.bul.push([PX+HERO_W-1,by]); g.shootT=4; g.ammo--; sPiu();
+  if(g.ammo===0){ g.reloadT=RELOAD_TIME; sEmpty(); } }
 
-function rowsOf(o){ const b=GROUND-1-o.off; return [b-o.art.length+1,b]; }
+function artOf(o){ return (o.art2&&o.f>=4)?o.art2:o.art; }
+function rowsOf(o){ const a=artOf(o),b=GROUND-1-o.off; return [b-a.length+1,b]; }
 
 function step(){
-  const sp=Math.min(2.5,1+g.dist/900);
+  g.t++;
+  const base=.95+1.75*(1-Math.exp(-g.dist/1400));
+  const wave=.12*Math.sin(g.t/47)+.07*Math.sin(g.t/13);
+  const sp=Math.max(.7,base+wave);
+  g.speed=sp;
   g.dist+=sp; g.score=Math.floor(g.dist/3)+g.kills*25;
   g.vy-=.16; g.y+=g.vy;
   if(g.y<=0){g.y=0;g.vy=0;g.jumps=0;}
   if(g.duck)g.duck--;
   if(g.shootT>0)g.shootT--;
+  if(g.clickT>0)g.clickT--;
+  const dt=1/FPS;
+  if(g.reloadT>0){ g.reloadT-=dt;
+    if(g.reloadT<=0){g.reloadT=0;g.ammo=MAG_SIZE;g.magT=MAG_WINDOW;sReload();} }
+  else { g.magT-=dt;
+    if(g.magT<=0){ if(g.ammo<MAG_SIZE){g.ammo=MAG_SIZE;sReload();} g.magT=MAG_WINDOW; } }
 
   g.bg.forEach(p=>p[0]-=sp*.35);
   g.bg=g.bg.filter(p=>p[0]+p[2].length>0);
@@ -204,10 +263,13 @@ function step(){
   g.obs.forEach(o=>{o.x-=sp; if(o.kind==='bird'){o.x-=sp*.25;o.f=((o.f||0)+1)%8;}});
   g.obs=g.obs.filter(o=>o.x+o.w>0);
   g.spawn-=sp;
-  if(g.spawn<=0){ const m=mkObs(Math.floor(g.dist/400));
-    g.obs.push({x:W+2,art:m.art,kind:m.kind,off:m.off,f:0,
+  if(g.spawn<=0){ const lvl=Math.floor(g.dist/400), m=mkObs(lvl);
+    g.obs.push({x:W+2,art:m.art,art2:m.art2,kind:m.kind,off:m.off,f:ri(8),
       w:Math.max.apply(null,m.art.map(r=>r.length))});
-    g.spawn=Math.max(16,20+ri(22)-Math.floor(g.dist/260)); }
+    const react=15+9*sp; let gap=react*(.75+Math.random()*.9);
+    const r=Math.random();
+    if(r<.14&&lvl>=1)gap=react*.55; else if(r>.93)gap=react*2.4;
+    g.spawn=Math.max(13,gap); }
 
   g.bul.forEach(b=>b[0]+=3.4);
   g.bul=g.bul.filter(b=>b[0]<W);
@@ -247,7 +309,7 @@ function draw(){
   g.bg.forEach(p=>b.put(p[0],p[1],p[2],'d'));
   g.parts.forEach(p=>b.put(p[0],Math.round(p[1]),p[5],'y'));
   g.obs.forEach(o=>{ const col=o.kind==='word'?'m':(o.kind==='bird'?'r':'g');
-    b.art(o.x,GROUND-1-o.off,o.kind==='bird'?(o.f<4?BIRD_A:BIRD_B):o.art,col); });
+    b.art(o.x,GROUND-1-o.off,artOf(o),col); });
   g.bul.forEach(bl=>b.put(bl[0],bl[1],'-=','y'));
   const pr=GROUND-1-Math.round(g.y);
   b.put(PX,pr,heroPose(),heroCol());
@@ -257,7 +319,17 @@ function draw(){
   for(let x=0;x<W;x++)gl+=pat[(x+Math.floor(g.dist))%4];
   b.put(0,GROUND+1,gl,'d');
   if(g.msgT>0)b.put(PX+4,pr-1,g.msg,'y');
-  b.put(1,H-1,' score '+g.score+'   best '+Math.max(hs,g.score)+'   kills '+g.kills+'   '+Math.floor(g.dist/4)+'m','w');
+  b.put(1,H-1,' score '+g.score+'  best '+Math.max(hs,g.score)+'  kills '+g.kills+
+        '  '+Math.floor(g.dist/4)+'m  x'+g.speed.toFixed(1),'w');
+  const ax=W-26;
+  if(g.reloadT>0){
+    const f=Math.round((1-g.reloadT/RELOAD_TIME)*10);
+    b.put(ax,H-1,'RELOAD ['+'#'.repeat(f)+'.'.repeat(10-f)+'] '+g.reloadT.toFixed(1)+'s','r');
+  } else {
+    b.put(ax,H-1,'piu ['+'|'.repeat(g.ammo)+'.'.repeat(MAG_SIZE-g.ammo)+'] '+
+          g.ammo+'  '+Math.floor(g.magT)+'s',g.ammo>3?'g':'y');
+  }
+  if(g.clickT>0)b.put(PX+HERO_W,pr,' *klick*','r');
   b.render();
 }
 
@@ -271,8 +343,9 @@ function drawStart(){
   b.put(0,11,'^'.repeat(W),'d');
   const btn=(blink>>2)%2===0?'[ START ]':'[       ]';
   b.put((W-btn.length)/2,13,btn,'g');
-  b.put((W-44)/2,15,'LEER=springen  ENTER=piu piu  S=ducken','d');
-  if(hs)b.put((W-16)/2,16,'bestleistung: '+hs,'y');
+  b.put((W-38)/2,15,'LEER=springen  ENTER=piu piu  S=ducken','d');
+  b.put((W-37)/2,16,'10 schuss / 30s  danach 5s nachladen','d');
+
   b.render();
 }
 
