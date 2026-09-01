@@ -1,5 +1,6 @@
 # Highscores sind lokal
 piuu_highscores.json
+piu_highscores.json
 
 # PyInstaller
 build/

@@ -1,46 +1,60 @@
-# PIUU PIUU 3000
+# PIU PIU 😈
 
-> Eine völlig sinnlose Windows-Terminal-Anwendung, die piuu piuu macht.
+> Ein ASCII-Endlosrunner fürs Terminal. Du bist ein kleiner Teufel. Du rennst. Du springst. Du machst piu piu.
 
-**🎮 [Im Browser ausprobieren](https://USER.github.io/piuu-piuu-3000/)** — Web-Demo mit echtem Laser-Sound.
+```
+ ____  _   _   _     ____  _   _   _
+|  _ \| | | | | |   |  _ \| | | | | |
+| |_) | | | | | |   | |_) | | | | | |
+|  __/| | | |_| |   |  __/| | | |_| |
+|_|   |_|  \___/    |_|    |_|  \___/
+```
+
+**🎮 [Im Browser spielen](https://USER.github.io/piuu-piuu-3000/)**
 
 ## Starten
 
-Doppelklick auf **`PIUU.bat`** (braucht installiertes Python)
-oder im Terminal:
+Doppelklick auf **`PIUU.bat`** oder:
 
 ```
 python piuu.py
 ```
 
-## Tasten im Spiel
+## Steuerung
 
 | Taste | Wirkung |
 |---|---|
-| `LEERTASTE` / `ENTER` | schießen |
-| `A` | Autofire an/aus |
-| `M` | Ton an/aus |
-| `N` | nächster Sound-Modus (laser → blaster → chaos) |
+| `LEERTASTE` / `W` / `↑` | springen — **2× für Doppelsprung** |
+| `S` / `↓` | ducken (in der Luft: schnell runter) |
+| `ENTER` | **piu piu** schießen — zerstört Hindernisse |
 | `P` | Pause |
-| `Q` oder `STRG+C` | beenden + Highscore speichern |
+| `Q` / `STRG+C` | beenden |
+
+## Was passiert da
+
+- Ein 😈 rennt durch eine scrollende ASCII-Landschaft
+- Hindernisse: Kakteen `|_|`, Felsen `/  \`, Spikes `/_\`, fliegende Vögel `~o>`
+- **Manchmal ist das Wort `piu` selbst das Hindernis** — überspringen oder wegballern
+- Im Himmel treiben Sprüche vorbei:
+  *piu piu* · *hast du aslok haare?* · *ik maken piu piu* · *und du nie wieder aslok haare* · *autsch\** · *piu*
+- Wolken, Parallax-Scrolling, Explosionspartikel, mitlaufender Boden
+- Es wird immer schneller. Kills geben +25 Punkte.
+- Startscreen mit `[ START ]`, Game-Over-Screen mit **Hall of Piu**
 
 ## Optionen
 
 ```
-python piuu.py --auto            # ballert von allein
-python piuu.py --mode chaos      # völlig irre Töne
-python piuu.py --speed 0.2       # schneller (kleiner = schneller)
-python piuu.py --silent          # ohne Ton
-python piuu.py --classic         # alter Modus, nur Laser ohne Gegner
-python piuu.py --name Kevin      # Name für den Highscore
-python piuu.py --scores          # Hall of Fame anzeigen und beenden
+python piuu.py --silent        # ohne Ton
+python piuu.py --ascii         # kein Emoji, Held wird @>
+python piuu.py --speed 0.7     # gemütlicher
+python piuu.py --name Kevin    # Name für den Highscore
+python piuu.py --scores        # Hall of Piu anzeigen
+python piuu.py --demo 300      # Autoplay-Demo (Test, ohne Tastatur)
 ```
 
 ## Highscores
 
-Werden automatisch beim Beenden in **`piuu_highscores.json`** gespeichert
-(Top 10, im selben Ordner). Punkte gibt's pro zerstörtem Gegner, mehr in
-höheren Wellen. Alle 5 Kills startet eine neue Welle mit Fanfare.
+Top 10 landen in **`piu_highscores.json`** im selben Ordner.
 
 ## Exe bauen
 
@@ -52,18 +66,16 @@ pip install pyinstaller
 pyinstaller --onefile --console --name PIUU piuu.py
 ```
 
-## Dateien
-
-- `piuu.py` – das Programm
-- `PIUU.bat` – Starter für Windows
-- `build_exe.bat` – baut die Exe
-- `piuu_highscores.json` – entsteht beim ersten Spiel
-
 ## Web-Demo / GitHub Page
 
 Die Seite liegt in `docs/`. Auf GitHub aktivieren unter
 **Settings → Pages → Source: `main` / Ordner `/docs`**.
-Danach erreichbar unter `https://USER.github.io/piuu-piuu-3000/`.
+
+## Hinweise
+
+Läuft am besten im **Windows Terminal** (Emoji + ANSI-Farben).
+In der alten `cmd.exe` sieht 😈 evtl. kaputt aus — dann `--ascii` benutzen.
+Terminal sollte mindestens **80×20** Zeichen groß sein.
 
 ## Lizenz
 

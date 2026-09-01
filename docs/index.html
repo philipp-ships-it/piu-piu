@@ -3,268 +3,313 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PIUU PIUU 3000</title>
-<meta name="description" content="Die sinnloseste Windows-Terminal-Anwendung der Welt. Sie macht piuu piuu.">
+<title>PIU PIU 😈 — ASCII Runner</title>
+<meta name="description" content="Ein ASCII-Endlosrunner fürs Terminal. Du rennst, springst und machst piu piu.">
 <style>
   :root{
-    --bg:#0b0e14; --panel:#11151f; --edge:#222a3a;
-    --fg:#c8d3e6;
-    --dim:#6b7790; --grn:#5ef08a; --cyn:#59e0ff; --yel:#ffd45e;
-    --red:#ff5f6d; --mag:#c86bff;
+    --bg:#0b0e14;--panel:#11151f;--edge:#222a3a;--fg:#c8d3e6;--dim:#6b7790;
+    --grn:#5ef08a;--cyn:#59e0ff;--yel:#ffd45e;--red:#ff5f6d;--mag:#c86bff;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; background:
-      radial-gradient(1100px 600px at 50% -10%, #17203a 0%, transparent 60%),
-      var(--bg);
-    color:var(--fg); font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    min-height:100vh;
-  }
-  .wrap{max-width:920px;margin:0 auto;padding:38px 20px 70px}
-  header{text-align:center;margin-bottom:32px}
-  pre.logo{
-    color:var(--cyn); font-size:clamp(5px,1.75vw,13px); line-height:1.15;
-    margin:0 0 6px; text-shadow:0 0 18px rgba(89,224,255,.45); overflow:hidden;
-  }
-  .tag{color:var(--dim);letter-spacing:.16em;text-transform:uppercase;font-size:12px}
-  h2{color:var(--yel);font-size:17px;margin:34px 0 12px;letter-spacing:.04em}
+  body{margin:0;background:radial-gradient(1100px 600px at 50% -10%,#17203a 0%,transparent 60%),var(--bg);
+       color:var(--fg);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto;padding:34px 18px 70px}
+  header{text-align:center;margin-bottom:26px}
+  pre.logo{color:var(--cyn);font-size:clamp(6px,1.9vw,14px);line-height:1.15;margin:0 0 8px;
+           text-shadow:0 0 18px rgba(89,224,255,.45);overflow:hidden}
+  .tag{color:var(--dim);letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+  h2{color:var(--yel);font-size:17px;margin:32px 0 12px}
   a{color:var(--cyn)}
-  .card{
-    background:var(--panel); border:1px solid var(--edge); border-radius:12px;
-    padding:16px 18px; box-shadow:0 14px 40px rgba(0,0,0,.45);
-  }
-  /* --- Demo --- */
-  #screen{
-    background:#05070c; border:1px solid var(--edge); border-radius:10px;
-    padding:14px; min-height:230px; white-space:pre; overflow:hidden;
-    font-size:clamp(9px,1.55vw,14px); line-height:1.45;
-  }
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-  button{
-    background:#18203a;color:var(--fg);
-    border:1px solid #2d3a58;border-radius:8px;padding:9px 16px;
-    font:inherit;font-size:14px;cursor:pointer;transition:.15s;
-  }
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:16px 18px;
+        box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  #screen{background:#05070c;border:1px solid var(--edge);border-radius:10px;padding:12px;
+          white-space:pre;overflow:hidden;font-size:clamp(6.5px,1.32vw,13px);line-height:1.22;
+          letter-spacing:0;min-height:250px}
+  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  button{background:#18203a;color:var(--fg);border:1px solid #2d3a58;border-radius:8px;
+         padding:9px 15px;font:inherit;font-size:14px;cursor:pointer;transition:.15s}
   button:hover{background:#222d4d;border-color:var(--cyn);color:#fff}
   button.primary{background:#1c3a2a;border-color:#2f6b48;color:var(--grn)}
-  button.primary:hover{background:#25523a}
-  .hint{color:var(--dim);font-size:13px}
-  .stats{color:var(--dim);font-size:13px;margin-top:10px}
-  .stats b{color:var(--grn);font-weight:600}
-  /* --- Tabelle / Code --- */
+  .hint{color:var(--dim);font-size:13px;margin-top:8px}
   table{width:100%;border-collapse:collapse;font-size:14px}
   td,th{padding:7px 10px;border-bottom:1px solid var(--edge);text-align:left}
-  th{color:var(--yel);font-weight:600}
-  kbd{
-    background:#1a2236;border:1px solid #33405e;border-bottom-width:2px;
-    border-radius:5px;padding:1px 7px;font-size:13px;color:#fff
-  }
-  code,pre.sh{background:#05070c;border:1px solid var(--edge);border-radius:8px}
-  code{padding:2px 6px;font-size:13.5px;color:var(--grn)}
-  pre.sh{padding:14px 16px;overflow-x:auto;color:var(--grn);font-size:13.5px;margin:0}
-  ul{padding-left:20px} li{margin:5px 0}
-  footer{margin-top:44px;text-align:center;color:var(--dim);font-size:13px}
-  .c{color:var(--cyn)} .g{color:var(--grn)} .y{color:var(--yel)}
-  .r{color:var(--red)} .m{color:var(--mag)} .d{color:var(--dim)}
+  th{color:var(--yel)}
+  kbd{background:#1a2236;border:1px solid #33405e;border-bottom-width:2px;border-radius:5px;
+      padding:1px 7px;font-size:13px;color:#fff}
+  code{background:#05070c;border:1px solid var(--edge);border-radius:6px;padding:2px 6px;
+       font-size:13.5px;color:var(--grn)}
+  pre.sh{background:#05070c;border:1px solid var(--edge);border-radius:8px;padding:14px 16px;
+         overflow-x:auto;color:var(--grn);font-size:13.5px;margin:0}
+  ul{padding-left:20px}li{margin:5px 0}
+  footer{margin-top:42px;text-align:center;color:var(--dim);font-size:13px}
+  .c{color:var(--cyn)}.g{color:var(--grn)}.y{color:var(--yel)}.r{color:var(--red)}
+  .m{color:var(--mag)}.d{color:var(--dim)}.w{color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-<pre class="logo">  ____  _____ _   _ _   _   ____  _____ _   _ _   _
- |  _ \|_   _| | | | | | | |  _ \|_   _| | | | | | |
- | |_) | | | | | | | | | | | |_) | | | | | | | | | |
- |  __/  | | | |_| | |_| | |  __/  | | | |_| | |_| |
- |_|     |_|  \___/ \___/  |_|     |_|  \___/ \___/</pre>
-<div class="tag">~ 3000 ~ &nbsp;·&nbsp; sie macht piuu piuu</div>
+<pre class="logo"> ____  _   _   _     ____  _   _   _
+|  _ \| | | | | |   |  _ \| | | | | |
+| |_) | | | | | |   | |_) | | | | | |
+|  __/| | | |_| |   |  __/| | | |_| |
+|_|   |_|  \___/    |_|    |_|  \___/</pre>
+<div class="tag">😈 der teufel rennt und ballert</div>
 </header>
 
 <div class="card">
-  <div id="screen"></div>
+  <div id="screen" tabindex="0"></div>
   <div class="row">
-    <button class="primary" id="fire">PIUU! (Leertaste)</button>
-    <button id="auto">Autofire: AUS</button>
-    <button id="mute">Ton: AN</button>
-    <button id="reset">Reset</button>
+    <button class="primary" id="bJump">SPRINGEN (Leertaste)</button>
+    <button id="bShoot">PIU PIU (Enter)</button>
+    <button id="bDuck">DUCKEN (S)</button>
+    <button id="bMute">Ton: AN</button>
   </div>
-  <div class="stats" id="stats">Kills: <b>0</b> · Schüsse: <b>0</b> · Score: <b>0</b> · Welle: <b>1</b></div>
-  <div class="hint" style="margin-top:6px">Browser-Demo mit echtem Laser-Sound. Die richtige Version läuft im Windows-Terminal.</div>
+  <div class="hint">Leertaste = springen (2× Doppelsprung) · Enter = schießen · S = ducken · P = Pause</div>
 </div>
 
-<h2>▸ Installieren</h2>
+<h2>▸ Im Terminal spielen</h2>
 <div class="card">
 <pre class="sh">git clone https://github.com/USER/piuu-piuu-3000.git
 cd piuu-piuu-3000
 python piuu.py</pre>
-<p class="hint" style="margin-bottom:0">Nur Python 3 nötig, keine Abhängigkeiten. Unter Windows reicht ein Doppelklick auf <code>PIUU.bat</code>.</p>
+<p class="hint" style="margin-bottom:0">Nur Python 3, keine Abhängigkeiten. Windows: Doppelklick auf <code>PIUU.bat</code>.</p>
 </div>
 
-<h2>▸ Tasten</h2>
+<h2>▸ Steuerung</h2>
 <div class="card">
 <table>
-<tr><th style="width:34%">Taste</th><th>Wirkung</th></tr>
-<tr><td><kbd>Leertaste</kbd> / <kbd>Enter</kbd></td><td>schießen</td></tr>
-<tr><td><kbd>A</kbd></td><td>Autofire an/aus</td></tr>
-<tr><td><kbd>M</kbd></td><td>Ton stumm/laut</td></tr>
-<tr><td><kbd>N</kbd></td><td>Sound-Modus: laser → blaster → chaos</td></tr>
+<tr><th style="width:38%">Taste</th><th>Wirkung</th></tr>
+<tr><td><kbd>Leertaste</kbd> <kbd>W</kbd> <kbd>↑</kbd></td><td>springen — 2× für Doppelsprung</td></tr>
+<tr><td><kbd>S</kbd> <kbd>↓</kbd></td><td>ducken</td></tr>
+<tr><td><kbd>Enter</kbd></td><td><b>piu piu</b> schießen</td></tr>
 <tr><td><kbd>P</kbd></td><td>Pause</td></tr>
-<tr><td><kbd>Q</kbd> / <kbd>Strg</kbd>+<kbd>C</kbd></td><td>beenden + Highscore speichern</td></tr>
+<tr><td><kbd>Q</kbd></td><td>beenden</td></tr>
 </table>
 </div>
 
-<h2>▸ Optionen</h2>
-<div class="card">
-<pre class="sh">python piuu.py --auto          # ballert von allein
-python piuu.py --mode chaos    # völlig irre Töne
-python piuu.py --speed 0.2     # schneller (kleiner = schneller)
-python piuu.py --silent        # ohne Ton
-python piuu.py --classic       # nur Laser, ohne Gegner
-python piuu.py --name Kevin    # Name für den Highscore
-python piuu.py --scores        # Hall of Fame anzeigen</pre>
-</div>
-
-<h2>▸ Features</h2>
+<h2>▸ Was passiert da</h2>
 <div class="card">
 <ul>
-<li>Echte Töne über <code>winsound.Beep</code> — absteigender Sweep = „piuu"</li>
-<li>Gegner mit 1–3 HP, Explosions-Animation und <span class="r">*BOOM*</span> / <span class="r">*PENG*</span> / <span class="r">*BLUBB*</span></li>
-<li>Wellen alle 5 Kills, mit Fanfare und mehr Punkten</li>
-<li>Top-10-Highscores in <code>piuu_highscores.json</code>, inkl. 🥇🥈🥉</li>
-<li>Regenbogenfarben via ANSI, läuft in cmd.exe und Windows Terminal</li>
-<li>Als <code>PIUU.exe</code> baubar — <code>build_exe.bat</code> doppelklicken</li>
+<li>Ein 😈 rennt durch eine scrollende ASCII-Landschaft</li>
+<li>Hindernisse: Kakteen, Felsen, Spikes <span class="g">/_\</span>, Vögel <span class="r">~o&gt;</span></li>
+<li>Manchmal ist das Wort <span class="m">piu</span> selbst das Hindernis</li>
+<li>Im Himmel treiben Sprüche vorbei: <span class="d">hast du aslok haare? · ik maken piu piu · autsch* · und du nie wieder aslok haare</span></li>
+<li>Wolken, Parallax, Explosionspartikel, Hall of Piu</li>
 </ul>
 </div>
 
-<h2>▸ Warum?</h2>
-<div class="card">
-<p style="margin:0">Sinn des Ganzen: weiterhin unklar.</p>
-</div>
-
-<footer>PIUU PIUU 3000 · MIT-Lizenz · gebaut, weil es piuu piuu macht</footer>
+<footer>PIU PIU 😈 · MIT · piu piu. und du nie wieder aslok haare.</footer>
 </div>
 
 <script>
 (function(){
-const SHIP='>=|=>', W=64;
-const ENEMIES=['<@>','{x}','(o)','<#>','[*]','<%>','vVv'];
-const BOOMS=['*BOOM*','*PENG*','*KRACH*','*PLOPP*','*RUMMS*','*BLUBB*'];
-const TRAILS=['-','=','~','*','·'];
-const CLS=['r','y','g','c','m'];
-const screenEl=document.getElementById('screen'),
-      statsEl=document.getElementById('stats'),
-      bFire=document.getElementById('fire'),
-      bAuto=document.getElementById('auto'),
-      bMute=document.getElementById('mute'),
-      bReset=document.getElementById('reset');
+const W=76,H=17,GROUND=H-4,PX=5;
+const PHRASES=["piu piu","hast du aslok haare?","ik maken piu piu",
+ "und du nie wieder aslok haare","autsch*","piu","piu piu piu",
+ "aslok? nie gehoert","PIU!","haare weg. piu."];
+const CLOUD=["   .-~-.   "," (  ___  ) ","  `-...-`  "];
+const CACTUS=["  _  "," | | ","_|_|_"], CACTUS_L=[" _ _ ","| | |","|_|_|","  |  "];
+const ROCK=[" __ ","/  \\","\\__/"], SPIKE=["/\\","/_\\"];
+const BIRD_A=["~o>"," ^ "], BIRD_B=["~o>"," v "];
+const BOOM=["piu!","autsch*","weg damit","piu piu"];
+const TITLE=[" ____  _   _   _     ____  _   _   _ ",
+"|  _ \\| | | | | |   |  _ \\| | | | | |",
+"| |_) | | | | | |   | |_) | | | | | |",
+"|  __/| | | |_| |   |  __/| | | |_| |",
+"|_|   |_|  \\___/    |_|    |_|  \\___/"];
+const GO=["  ____   _    __  __ ___    _____   _____ ____  ",
+" / ___| / \\  |  \\/  | __|  / _ \\ \\ / / __|  _ \\ ",
+"| |  _ / _ \\ | |\\/| | _|  | (_) \\ V /| _|| |_) |",
+"|_|_|_/_/ \\_\\|_|  |_|___|  \\___/ \\_/ |___|_| \\_\\"];
 
-let lines=[], st={kills:0,shots:0,score:0,wave:1},
-    busy=false, auto=false, muted=false, enemy=null, ac=null;
+const el=document.getElementById('screen');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ri=n=>Math.floor(Math.random()*n), pick=a=>a[ri(a.length)];
+let muted=false, ac=null;
+function tone(f0,f1,d,t){ if(muted)return; try{
+  ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+  if(ac.state==='suspended')ac.resume();
+  const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;
+  o.type=t||'square';o.frequency.setValueAtTime(f0,n);
+  o.frequency.exponentialRampToValueAtTime(Math.max(40,f1),n+d);
+  g.gain.setValueAtTime(.1,n);g.gain.exponentialRampToValueAtTime(.0008,n+d);
+  o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d+.02);}catch(e){} }
+const sPiu=()=>tone(1700+ri(400),400,.1),
+      sJump=()=>tone(650,1150,.09,'triangle'),
+      sKill=()=>tone(800,180,.16,'sawtooth'),
+      sHit=()=>{tone(300,70,.4,'sawtooth');setTimeout(()=>tone(180,50,.3),60);},
+      sGo=()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.09,'triangle'),i*85));
 
-const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const pad=n=>' '.repeat(Math.max(0,n));
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Buffer
+function Buf(){ this.g=[];this.c=[];
+  for(let y=0;y<H;y++){this.g.push(new Array(W).fill(' '));this.c.push(new Array(W).fill(null));} }
+Buf.prototype.put=function(x,y,s,col){ if(y<0||y>=H)return; x=Math.round(x);
+  for(let i=0;i<s.length;i++){const xx=x+i; if(xx>=0&&xx<W){this.g[y][xx]=s[i];this.c[y][xx]=col;}} };
+Buf.prototype.art=function(x,yb,a,col){ for(let i=0;i<a.length;i++) this.put(x,yb-(a.length-1-i),a[i],col); };
+Buf.prototype.render=function(){ let o='';
+  for(let y=0;y<H;y++){ let cur=null,open=false,line='';
+    for(let x=0;x<W;x++){ const ch=this.g[y][x],col=this.c[y][x];
+      if(col!==cur){ if(open){line+='</span>';open=false;} if(col){line+='<span class="'+col+'">';open=true;} cur=col; }
+      line+=esc(ch); }
+    if(open)line+='</span>'; o+=line+(y<H-1?'\n':''); }
+  el.innerHTML=o; };
 
-function push(html){ lines.push(html); if(lines.length>11) lines.shift(); draw(); }
-function draw(cur){
-  screenEl.innerHTML=(cur!==undefined?lines.concat(cur):lines).join('\n');
+let state='start', g=null, blink=0, hs=+(localStorage.getItem('piu_hs')||0), goData=null;
+
+function newGame(){ return {y:0,vy:0,jumps:0,duck:0,obs:[],bul:[],bg:(function(){
+    const rows=[];while(rows.length<3){const r=2+ri(GROUND-7);if(rows.indexOf(r)<0)rows.push(r);}
+    return rows.map(r=>[Math.random()*W,r,pick(PHRASES)]);})(),
+  clouds:[[Math.random()*W,ri(2)]],parts:[],dist:0,score:0,kills:0,spawn:20,dead:false,msg:'',msgT:0}; }
+
+function mkObs(lvl){ let pool=['cactus','cactus','rock','word','spike'];
+  if(lvl>=2)pool=pool.concat(['bird','word']); if(lvl>=4)pool=pool.concat(['bird','cactus_l']);
+  const k=pick(pool);
+  if(k==='cactus')return{art:CACTUS,kind:'solid',off:0};
+  if(k==='cactus_l')return{art:CACTUS_L,kind:'solid',off:0};
+  if(k==='rock')return{art:ROCK,kind:'solid',off:0};
+  if(k==='spike')return{art:SPIKE,kind:'solid',off:0};
+  if(k==='bird')return{art:BIRD_A,kind:'bird',off:pick([3,4])};
+  return{art:[pick(['piu','piu piu'])],kind:'word',off:0}; }
+
+function jump(){ if(g&&g.jumps<2){g.vy=g.jumps===0?1.5:1.3;g.jumps++;g.duck=0;sJump();} }
+function duck(){ if(!g)return; if(g.y<=.01)g.duck=8; else g.vy-=.9; }
+function shoot(){ if(!g)return; let by=GROUND-1-Math.round(g.y); if(g.duck)by=GROUND-1;
+  g.bul.push([PX+2,by]); sPiu(); }
+
+function rowsOf(o){ const b=GROUND-1-o.off; return [b-o.art.length+1,b]; }
+
+function step(){
+  const sp=Math.min(2.5,1+g.dist/900);
+  g.dist+=sp; g.score=Math.floor(g.dist/3)+g.kills*25;
+  g.vy-=.16; g.y+=g.vy;
+  if(g.y<=0){g.y=0;g.vy=0;g.jumps=0;}
+  if(g.duck)g.duck--;
+
+  g.bg.forEach(p=>p[0]-=sp*.35);
+  g.bg=g.bg.filter(p=>p[0]+p[2].length>0);
+  if(Math.random()<.035&&g.bg.length<5){
+    const taken=g.bg.filter(p=>p[0]+p[2].length>W-4).map(p=>p[1]);
+    const free=[];for(let y=2;y<GROUND-5;y++)if(taken.indexOf(y)<0)free.push(y);
+    if(free.length)g.bg.push([W,pick(free),pick(PHRASES)]); }
+  g.clouds.forEach(c=>c[0]-=sp*.18);
+  g.clouds=g.clouds.filter(c=>c[0]+11>0);
+  if(Math.random()<.012&&g.clouds.length<2)g.clouds.push([W,ri(2)]);
+
+  g.obs.forEach(o=>{o.x-=sp; if(o.kind==='bird'){o.x-=sp*.25;o.f=((o.f||0)+1)%8;}});
+  g.obs=g.obs.filter(o=>o.x+o.w>0);
+  g.spawn-=sp;
+  if(g.spawn<=0){ const m=mkObs(Math.floor(g.dist/400));
+    g.obs.push({x:W+2,art:m.art,kind:m.kind,off:m.off,f:0,
+      w:Math.max.apply(null,m.art.map(r=>r.length))});
+    g.spawn=Math.max(16,20+ri(22)-Math.floor(g.dist/260)); }
+
+  g.bul.forEach(b=>b[0]+=3.4);
+  g.bul=g.bul.filter(b=>b[0]<W);
+  for(const b of g.bul.slice()) for(const o of g.obs.slice()){
+    const [t,bo]=rowsOf(o);
+    if(b[0]>=o.x-1&&b[0]<=o.x+o.w&&b[1]>=t&&b[1]<=bo){
+      g.obs.splice(g.obs.indexOf(o),1); g.bul.splice(g.bul.indexOf(b),1);
+      g.kills++; sKill(); g.msg=pick(BOOM); g.msgT=12;
+      for(let i=0;i<7;i++)g.parts.push([o.x+o.w/2,(t+bo)/2,
+        (Math.random()-.5)*1.6,(Math.random()-.5)*1,3+ri(5),pick("*.,'`^")]);
+      break; } }
+
+  g.parts.forEach(p=>{p[0]+=p[2];p[1]+=p[3];p[4]--;});
+  g.parts=g.parts.filter(p=>p[4]>0);
+  if(g.msgT>0)g.msgT--;
+
+  const pr=GROUND-1-Math.round(g.y);
+  for(const o of g.obs){ const [t,bo]=rowsOf(o);
+    if(o.x+o.w-1<PX-0.2||o.x>PX+1.2)continue;
+    if(pr>=t&&pr<=bo){g.dead=true;return;} }
 }
-function stats(){
-  statsEl.innerHTML='Kills: <b>'+st.kills+'</b> · Schüsse: <b>'+st.shots+
-    '</b> · Score: <b>'+st.score+'</b> · Welle: <b>'+st.wave+'</b>';
+
+function draw(){
+  const b=new Buf();
+  g.clouds.forEach(c=>CLOUD.forEach((r,i)=>b.put(c[0],c[1]+i,r,'d')));
+  g.bg.forEach(p=>b.put(p[0],p[1],p[2],'d'));
+  g.parts.forEach(p=>b.put(p[0],Math.round(p[1]),p[5],'y'));
+  g.obs.forEach(o=>{ const col=o.kind==='word'?'m':(o.kind==='bird'?'r':'g');
+    b.art(o.x,GROUND-1-o.off,o.kind==='bird'?(o.f<4?BIRD_A:BIRD_B):o.art,col); });
+  g.bul.forEach(bl=>b.put(bl[0],bl[1],'-=','y'));
+  const pr=GROUND-1-Math.round(g.y);
+  if(g.duck) b.put(PX,GROUND-1,'👿','r');
+  else { b.put(PX,pr,'😈',null); if(g.y>.3)b.put(PX,pr+1,'^','d'); }
+  b.put(0,GROUND,'_'.repeat(W),'d');
+  const pat='^~-_'; let gl='';
+  for(let x=0;x<W;x++)gl+=pat[(x+Math.floor(g.dist))%4];
+  b.put(0,GROUND+1,gl,'d');
+  if(g.msgT>0)b.put(PX+4,pr-1,g.msg,'y');
+  b.put(1,H-1,' score '+g.score+'   best '+Math.max(hs,g.score)+'   kills '+g.kills+'   '+Math.floor(g.dist/4)+'m','w');
+  b.render();
 }
 
-// --- WebAudio: piuu ---
-function tone(f0,f1,dur,type){
-  if(muted) return;
-  try{
-    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    if(ac.state==='suspended') ac.resume();
-    const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime;
-    o.type=type||'square';
-    o.frequency.setValueAtTime(f0,t);
-    o.frequency.exponentialRampToValueAtTime(Math.max(40,f1),t+dur);
-    g.gain.setValueAtTime(.13,t);
-    g.gain.exponentialRampToValueAtTime(.0008,t+dur);
-    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+.02);
-  }catch(e){}
-}
-const piuu =()=>tone(1600+Math.random()*600,320,.18,'square');
-const boom =()=>{ tone(240,45,.32,'sawtooth'); setTimeout(()=>tone(160,35,.26,'square'),40); };
-const fanfare=()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.11,'triangle'),i*110));
-
-function newEnemy(){
-  enemy={ch:ENEMIES[(Math.random()*ENEMIES.length)|0], hp:1+((Math.random()*3)|0)};
-}
-function idle(){
-  if(!enemy) newEnemy();
-  const gap=W-SHIP.length-enemy.ch.length;
-  push('<span class="c">'+esc(SHIP)+'</span>'+pad(gap)+
-       '<span class="r">'+esc(enemy.ch)+'</span><span class="d">  HP:'+'#'.repeat(enemy.hp)+'</span>');
+function drawStart(){
+  const b=new Buf();
+  TITLE.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'c'));
+  b.put((W-28)/2,7,'der teufel rennt und ballert','d');
+  b.put(7,9,'😈',null); b.put(11,9,'- - -','y');
+  b.put(19,9,'piu piu','m'); b.put(31,9,'~o>','r');
+  b.put(39,9,' _ ','g'); b.put(39,10,'|_|','g');
+  b.put(0,11,'^'.repeat(W),'d');
+  const btn=(blink>>2)%2===0?'[ START ]':'[       ]';
+  b.put((W-btn.length)/2,13,btn,'g');
+  b.put((W-44)/2,15,'LEER=springen  ENTER=piu piu  S=ducken','d');
+  if(hs)b.put((W-16)/2,16,'bestleistung: '+hs,'y');
+  b.render();
 }
 
-async function shoot(){
-  if(busy) return; busy=true;
-  if(!enemy) newEnemy();
-  const cls=CLS[(Math.random()*CLS.length)|0], tr=TRAILS[(Math.random()*TRAILS.length)|0];
-  const gap=W-SHIP.length-enemy.ch.length, step=2;
-  lines.pop();
-
-  for(let x=0;x<gap;x+=step){
-    const beam=tr.repeat(Math.min(7,gap-x));
-    draw('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(x)+
-         '<span class="'+cls+'">'+esc(beam)+'</span>'+pad(Math.max(0,gap-x-beam.length))+
-         '<span class="r">'+esc(enemy.ch)+'</span>');
-    await sleep(11);
-  }
-  piuu(); st.shots++; enemy.hp--;
-
-  if(enemy.hp>0){
-    push('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+
-         '<span class="y">'+esc(enemy.ch)+' &lt;- hält noch durch</span>');
-    await sleep(160);
-  }else{
-    for(const f of ['<span class="y">\\|/</span>','<span class="r">-*-</span>',
-                    '<span class="m">/|\\</span>','<span class="d"> . </span>']){
-      draw('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+f);
-      await sleep(55);
-    }
-    boom();
-    const pts=50+((Math.random()*200)|0)+st.wave*10;
-    st.kills++; st.score+=pts;
-    push('<span class="'+cls+'">'+esc(SHIP)+'</span>'+pad(gap)+
-         '<span class="g">'+BOOMS[(Math.random()*BOOMS.length)|0]+'</span>'+
-         '<span class="d">  +'+pts+' Punkte</span>');
-    enemy=null;
-    if(st.kills%5===0){
-      st.wave++;
-      push('<span class="c">  &gt;&gt;&gt; WELLE '+st.wave+' &lt;&lt;&lt;</span>'+
-           '<span class="d">  (die Gegner werden nicht schlauer)</span>');
-      fanfare(); await sleep(320);
-    }
-    await sleep(120);
-  }
-  stats(); idle(); busy=false;
+function drawGO(){
+  const b=new Buf();
+  GO.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'r'));
+  b.put((W-7)/2,6,'autsch*','y');
+  const m='score '+goData.s+'   kills '+goData.k+'   strecke '+goData.d+'m';
+  b.put((W-m.length)/2,7,m,'w');
+  if(goData.rec)b.put((W-21)/2,8,'*** NEUER REKORD! ***','m');
+  b.put((W-17)/2,10,'-- hall of piu --','c');
+  b.put((W-15)/2,12,'best: '+hs,'g');
+  const t=(blink>>2)%2===0?'LEERTASTE = nochmal':'                   ';
+  b.put((W-t.length)/2,15,t,'y');
+  b.render();
 }
 
-function reset(){
-  lines=[]; st={kills:0,shots:0,score:0,wave:1}; enemy=null;
-  push('<span class="d">  PIUU PIUU 3000 — Leertaste zum Feuern</span>');
-  push('<span class="c">  &gt;&gt;&gt; WELLE 1 &lt;&lt;&lt;</span><span class="d">  (die Gegner werden nicht schlauer)</span>');
-  stats(); idle();
+let last=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(ts-last<55)return; last=ts;
+  blink++;
+  if(state==='start'){drawStart();return;}
+  if(state==='over'){drawGO();return;}
+  if(state==='pause')return;
+  step(); draw();
+  if(g.dead){ sHit(); const rec=g.score>hs; if(rec){hs=g.score;localStorage.setItem('piu_hs',hs);}
+    goData={s:g.score,k:g.kills,d:Math.floor(g.dist/4),rec:rec};
+    state='over'; setTimeout(sGo,300); }
 }
 
-bFire.onclick=shoot;
-bReset.onclick=reset;
-bAuto.onclick=()=>{ auto=!auto; bAuto.textContent='Autofire: '+(auto?'AN':'AUS'); if(auto) shoot(); };
-bMute.onclick =()=>{ muted=!muted; bMute.textContent='Ton: '+(muted?'AUS':'AN'); };
+function start(){ g=newGame(); state='play'; sGo(); }
+function action(a){
+  if(state==='start'){ if(a==='jump'||a==='shoot')start(); return; }
+  if(state==='over'){ if(a==='jump'||a==='shoot')start(); return; }
+  if(state==='pause'){ state='play'; return; }
+  if(a==='jump')jump(); else if(a==='shoot')shoot();
+  else if(a==='duck')duck(); else if(a==='pause')state='pause';
+}
 document.addEventListener('keydown',e=>{
-  if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); shoot(); }
-  else if(e.key==='a'||e.key==='A') bAuto.click();
-  else if(e.key==='m'||e.key==='M') bMute.click();
+  const k=e.key.toLowerCase();
+  if(e.code==='Space'||k==='w'||k==='arrowup'){e.preventDefault();action('jump');}
+  else if(k==='enter'){e.preventDefault();action('shoot');}
+  else if(k==='s'||k==='arrowdown'){e.preventDefault();action('duck');}
+  else if(k==='p')action('pause');
 });
-setInterval(()=>{ if(auto&&!busy) shoot(); },420);
-reset();
+document.getElementById('bJump').onclick=()=>action('jump');
+document.getElementById('bShoot').onclick=()=>action('shoot');
+document.getElementById('bDuck').onclick=()=>action('duck');
+document.getElementById('bMute').onclick=function(){muted=!muted;this.textContent='Ton: '+(muted?'AUS':'AN');};
+el.addEventListener('pointerdown',()=>action('jump'));
+requestAnimationFrame(loop);
 })();
 </script>
 </body>
