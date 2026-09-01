@@ -132,7 +132,29 @@ python piuu.py --demo 300      # Autoplay-Demo (Test, ohne Tastatur)
 
 ## Highscores
 
-Top 10 landen in **`piu_highscores.json`** im selben Ordner.
+Es ist ein lokales Spiel — deshalb gibt es **einen Eintrag pro Spieler**,
+nicht eine Liste voller Duplikate:
+
+- Pro Name wird nur die **Bestleistung** gespeichert
+- Jeder Lauf erhöht den Lauf-Zähler: `1. philipp   294  (7 laeufe)`
+- Ein schlechterer Lauf ändert den Rekord nicht (`bestleistung bleibt: 294`)
+- Groß-/Kleinschreibung und Leerzeichen zählen als **derselbe** Spieler
+- Alte Dateien mit Duplikaten werden beim Laden **automatisch zusammengeführt**
+
+Gespeichert in **`piu_highscores.json`** im selben Ordner.
+Anzeigen mit `python piuu.py --scores`.
+
+## Tests
+
+```
+python -m unittest test_piu -v
+```
+
+83 Tests decken Highscores, Munition (10 Schuss / 30 s / 5 s Reload), Physik,
+Kollision, Hindernis-Katalog, responsives Layout, Rendering, Screens und die
+CLI ab. Die Suite wurde per Mutation Testing geprüft: künstlich eingebaute
+Fehler (Duplikat-Bug, falsche Magazingröße, falsche Reload-Zeit, kaputte
+Hitbox, FPS-Drift) werden alle erkannt.
 
 ## Exe bauen
 

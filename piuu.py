@@ -120,6 +120,7 @@ RELOAD_TIME = 5.0      # Sekunden Nachladen wenn leergeballert
 FPS = 18.0             # Frames pro Sekunde (Frame = 1/FPS Sekunden)
 
 SCORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "piu_highscores.json")
+MAX_SCORES = 10
 
 # ---------------- Hintergrund-Spruechle ----------------
 PHRASES = [
@@ -426,28 +427,89 @@ class Buf:
 
 
 # ---------------- Highscore ----------------
+def _norm(name):
+    """Vergleichsschluessel fuer Spielernamen (case/space-insensitiv)."""
+    return " ".join((name or "").split()).lower()
+
+
 def load_scores():
+    """Liest die Bestenliste. Alte Dateien mit Duplikaten werden
+    beim Laden automatisch zu einem Eintrag pro Spieler zusammengefasst."""
     try:
         with open(SCORE_FILE, encoding="utf-8") as f:
             d = json.load(f)
-        return d if isinstance(d, list) else []
+        if not isinstance(d, list):
+            return []
     except Exception:
         return []
 
+    merged = {}
+    for e in d:
+        if not isinstance(e, dict):
+            continue
+        name = str(e.get("name", "Piu"))[:14]
+        k = _norm(name)
+        cur = merged.get(k)
+        score = int(e.get("score", 0) or 0)
+        kills = int(e.get("kills", 0) or 0)
+        runs = int(e.get("runs", 1) or 1)
+        if cur is None:
+            merged[k] = {"name": name, "score": score, "kills": kills,
+                         "runs": runs, "date": e.get("date", "")}
+        else:
+            # Bestwert behalten, Laeufe aufsummieren
+            cur["runs"] = cur.get("runs", 1) + runs
+            if score > cur["score"]:
+                cur.update({"name": name, "score": score, "kills": kills,
+                            "date": e.get("date", cur.get("date", ""))})
+
+    out_list = sorted(merged.values(), key=lambda x: x.get("score", 0), reverse=True)
+    return out_list[:MAX_SCORES]
+
 
 def save_score(name, score, kills):
-    s = load_scores()
-    e = {"name": (name or "Piu")[:14], "score": int(score), "kills": kills,
-         "date": datetime.now().strftime("%d.%m.%y %H:%M")}
-    s.append(e)
-    s.sort(key=lambda x: x.get("score", 0), reverse=True)
-    s = s[:10]
+    """Speichert einen Lauf. Pro Spieler bleibt nur die Bestleistung.
+    Rueckgabe: (liste, platz, is_record) - is_record = eigener Rekord verbessert."""
+    scores = load_scores()
+    name = (name or "Piu")[:14]
+    key = _norm(name)
+    score = int(score)
+
+    entry = None
+    for e in scores:
+        if _norm(e.get("name", "")) == key:
+            entry = e
+            break
+
+    if entry is None:
+        entry = {"name": name, "score": score, "kills": int(kills),
+                 "runs": 1, "date": datetime.now().strftime("%d.%m.%y %H:%M")}
+        scores.append(entry)
+        improved = True
+    else:
+        entry["runs"] = int(entry.get("runs", 1)) + 1
+        entry["name"] = name
+        improved = score > int(entry.get("score", 0))
+        if improved:
+            entry["score"] = score
+            entry["kills"] = int(kills)
+            entry["date"] = datetime.now().strftime("%d.%m.%y %H:%M")
+
+    scores.sort(key=lambda x: x.get("score", 0), reverse=True)
+    del scores[MAX_SCORES:]
+
     try:
         with open(SCORE_FILE, "w", encoding="utf-8") as f:
-            json.dump(s, f, indent=2, ensure_ascii=False)
+            json.dump(scores, f, indent=2, ensure_ascii=False)
     except Exception:
         pass
-    return s, (s.index(e) + 1 if e in s else None)
+
+    rank = None
+    for i, e in enumerate(scores, 1):
+        if _norm(e.get("name", "")) == key:
+            rank = i
+            break
+    return scores, rank, improved
 
 
 def best():
@@ -515,7 +577,7 @@ GAMEOVER = [
 ]
 
 
-def draw_gameover(score, kills, dist, rank, scores):
+def draw_gameover(score, kills, dist, rank, scores, improved=False):
     b = Buf()
     y = 1
     if b.h >= 17 and b.w >= len(GAMEOVER[0]) + 2:
@@ -529,17 +591,26 @@ def draw_gameover(score, kills, dist, rank, scores):
     _center(b, y, HERO_KAO["dead"][0], RED)
     _center(b, y + 1, "autsch*", YEL)
     _center(b, y + 2, "score %d   kills %d   strecke %dm" % (score, kills, dist), WHT)
-    if rank == 1:
+    if improved and rank == 1:
         _center(b, y + 3, "*** NEUER REKORD! ***", MAG)
-    elif rank:
-        _center(b, y + 3, "platz %d der liste" % rank, GRN)
+    elif improved:
+        _center(b, y + 3, "neue bestleistung! platz %d" % rank, GRN)
+    else:
+        pb = 0
+        for e in scores:
+            if rank and scores.index(e) + 1 == rank:
+                pb = e.get("score", 0)
+        _center(b, y + 3, "bestleistung bleibt: %d" % pb, DIM)
 
     y += 5
     room = (b.h - 2) - y
     if room >= 2:
         _center(b, y, "-- hall of piu --", CYN)
         for i, e in enumerate(scores[:max(0, min(5, room - 1))]):
+            runs = int(e.get("runs", 1))
             row = "%d. %-14s %6d" % (i + 1, e.get("name", "?"), e.get("score", 0))
+            if b.w >= 54:
+                row += "  (%d %s)" % (runs, "lauf" if runs == 1 else "laeufe")
             _center(b, y + 1 + i, row, GRN if (i + 1) == rank else DIM)
 
     _center(b, b.h - 1, "LEERTASTE = nochmal    Q = ende", YEL)
@@ -893,8 +964,14 @@ def main():
     a = ap.parse_args()
 
     if a.scores:
-        for i, e in enumerate(load_scores(), 1):
-            print("%2d. %-14s %6d  %s" % (i, e.get("name", "?"), e.get("score", 0), e.get("date", "")))
+        sc = load_scores()
+        if not sc:
+            print("noch keine eintraege. spiel erst mal.")
+        for i, e in enumerate(sc, 1):
+            runs = int(e.get("runs", 1))
+            print("%2d. %-14s %6d  %3d kills  %4d %s  %s" % (
+                i, e.get("name", "?"), e.get("score", 0), e.get("kills", 0),
+                runs, "lauf " if runs == 1 else "laeufe", e.get("date", "")))
         return
 
     if IS_WIN:
@@ -1005,14 +1082,14 @@ def main():
 
             # ---- Game Over ----
             snd.hit()
-            scores, rank = save_score(name, g.score, g.kills)
+            scores, rank, improved = save_score(name, g.score, g.kills)
             out(CLEAR)
-            draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores)
+            draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores, improved)
             keys.flush()
             while True:
                 if fit():
                     out(CLEAR)
-                    draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores)
+                    draw_gameover(g.score, g.kills, int(g.dist / 4), rank, scores, improved)
                 k = keys.get()
                 if k == "quit":
                     return
