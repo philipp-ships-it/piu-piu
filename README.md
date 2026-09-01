@@ -10,7 +10,7 @@
 |_|   |_|  \___/    |_|    |_|  \___/
 ```
 
-**🎮 [Im Browser spielen](https://USER.github.io/piu-piu/)**
+**🎮 [Im Browser spielen](https://philipp-ships-it.github.io/piu-piu/)**
 
 ## Starten
 
