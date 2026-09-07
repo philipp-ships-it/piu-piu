@@ -1,0 +1,15 @@
+[project]
+name = "piu-piu"
+version = "2.0.0"
+description = "Ein deutscher ASCII-Endlosrunner für das Terminal"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = []
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

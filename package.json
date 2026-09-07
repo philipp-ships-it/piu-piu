@@ -1,0 +1,12 @@
+{
+  "name": "piu-piu-web",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lokale Werkzeuge und Tests der statischen PIU-PIU-Webseite",
+  "scripts": {
+    "test": "node --test tests/web/*.test.js",
+    "preview": "node scripts/preview.mjs"
+  },
+  "engines": {"node": ">=20"}
+}

@@ -18,3 +18,15 @@ venv/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Lokale Profile, Diagnose und Testausgaben
+profile.json
+profile.backup.json
+profile.recovery-*.json
+profile.lock
+piu.log*
+.piu-*.tmp
+.qa/
+.playwright-mcp/
+testprofil/
+node_modules/

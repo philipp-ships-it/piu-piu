@@ -1,182 +1,132 @@
-# PIU PIU (ง•_•)ง
+# PIU PIU — Kleiner Held. Großes Piu.
 
-> Ein ASCII-Endlosrunner fürs Terminal. Ein kleines Kaomoji-Männchen rennt, springt und macht piu piu.
+```text
+ ____  ___ _   _   ____  ___ _   _
+|  _ \|_ _| | | | |  _ \|_ _| | | |
+| |_) || || | | | | |_) || || | | |
+|  __/ | || |_| | |  __/ | || |_| |
+|_|   |___|\___/  |_|   |___|\___/
 
+       (ง•_•)ง   - - piu!    |#|
+  ___/__/__/__/__/__/__/__/__/__/___
 ```
- ____  _   _   _     ____  _   _   _
-|  _ \| | | | | |   |  _ \| | | | | |
-| |_) | | | | | |   | |_) | | | | | |
-|  __/| | | |_| |   |  __/| | | |_| |
-|_|   |_|  \___/    |_|    |_|  \___/
-```
 
-**🎮 [Im Browser spielen](https://philipp-ships-it.github.io/piu-piu/)**
+Ein deutscher ASCII-Endlosrunner: springen, Hindernisse wegschießen und den
+eigenen Rekord schlagen. Das **Python-Spiel** läuft ohne zusätzliche Pakete.
+Die **Webseite** enthält eine eigenständige, direkt spielbare Browser-Version.
 
-## Starten
+## Schnellstart
 
-Doppelklick auf **`PIUU.bat`** oder:
+Voraussetzung: **Python 3.10 oder neuer**. Windows: `PIUU.bat` doppelklicken.
+Alternativ im entpackten Projektordner:
 
-```
+```console
 python piuu.py
 ```
 
-## Steuerung
+Auch `python -m piu` funktioniert. Unter Windows kann der Python-Launcher mit
+`py -3 piuu.py` verwendet werden. Kein `pip install` erforderlich.
+Ein explizites, freigegebenes Python lässt sich über `PIU_PYTHON` für die
+Windows-Startdatei angeben. Firmen-Sicherheitssoftware wird nicht umgangen.
 
-| Taste | Wirkung |
+## Spiel und Einstellungen
+
+| Im Spiel | Aktion |
 |---|---|
-| `LEERTASTE` / `W` / `↑` | springen — **2× für Doppelsprung** |
-| `S` / `↓` | ducken (in der Luft: schnell runter) |
-| `ENTER` | **piu piu** schießen — 10 Schuss pro Magazin |
-| `P` | Pause |
-| `Q` / `STRG+C` | beenden |
+| Leertaste / W / ↑ | Springen; ein zweites Mal für den Doppelsprung |
+| Enter | Schießen |
+| S / ↓ | Ducken; in der Luft schneller fallen |
+| P | Pause und speichern |
+| Q / Strg+C | Runde speichern und beenden |
 
-## Der Held
+Im Startmenü gibt es **START**, **SETTINGS** und **ENDE**. Bei vorhandenem
+Rundenstand erscheint **FORTSETZEN**. Vor dem Ersetzen einer Runde wird gefragt.
+Menüs: W/S oder ↑/↓ wählen, A/D oder ←/→ ändern, Enter/Leertaste bestätigen,
+Escape zurück. Die Settings-Liste scrollt in kleinen Fenstern.
 
-Ein Kaomoji-Männchen mit eigener Pose für jeden Zustand (alle exakt 7 Zeichen breit,
-damit nichts wackelt):
+| Preset | Tempo | Hindernisse | Magazin |
+|---|---|---|---|
+| leicht | x0.75 | wenig | 15 |
+| normal | x1.00 | normal | 10 |
+| schwer | x1.35 | viele | 8 |
+| irre | x1.75 | extrem | 6 |
 
-| Zustand | Pose |
+Tempo, Dichte und Magazin sind einzeln einstellbar; das Label wechselt dann zu
+**eigen**. Fünf kombinierbare Cheats: unendlich Munition, Nachladen in 0,35 s,
+Unverwundbarkeit, doppelte Punkte, Mega-Sprung mit 45 % mehr Sprungkraft.
+
+**Cheat-Runden zählen weder für den Highscore noch zum Laufzähler.**
+Schwierigkeit ist kein Cheat: Auch leicht und eigen zählen regulär.
+
+## Alles bleibt erhalten
+
+Settings werden sofort gespeichert. Die Runde wird alle **fünf Sekunden
+Spielzeit**, beim Start, bei Pause und beim Beenden gesichert. Fortsetzen erhält
+Position, Munition, Nachladezeit, Hindernisse, Punkte und die Zufallsfolge.
+
+- Windows: `%LOCALAPPDATA%\PiuPiu`
+- Linux/macOS: `$XDG_STATE_HOME/piu-piu`, sonst `~/.local/state/piu-piu`
+- Eigener Ordner: `python piuu.py --data-dir "D:\Spiele\PiuDaten"`
+
+Profil, Backup und Fehlerprotokoll liegen dort gemeinsam. Alte Score-Dateien
+neben dem bisherigen Spiel werden beim ersten Start übernommen und behalten.
+Die Browser-Version speichert unabhängig im lokalen Browserspeicher.
+
+## Häufige Optionen
+
+```console
+python piuu.py --silent
+python piuu.py --ascii --size 80x20
+python piuu.py --name Alex
+python piuu.py --scores
+python piuu.py --diagnose
+python piuu.py --demo 400 --seed 0
+python piuu.py --help
+```
+
+Bei Problemen zuerst `--diagnose` und die [Fehlerbehebung](handbuch/FEHLERBEHEBUNG.md)
+lesen. Eine Demo benötigt kein interaktives Terminal und schreibt keine Profile.
+
+## Handbuch
+
+| Dokument | Inhalt |
 |---|---|
-| rennen | `(ง•_•)ง` ↔ `ᕦ(•_•)ᕤ` (animiert) |
-| springen | `\(•o•)/` |
-| fallen | `/(•_•)\` |
-| ducken | `(>_<)__` |
-| schießen | `(ง•_•)=` |
-| tot | `~(X_X)~` |
+| [Spielanleitung](handbuch/SPIELANLEITUNG.md) | Regeln, Bedienung, Presets, Cheats, Optionen |
+| [Daten und Wiederherstellung](handbuch/DATEN.md) | Speicherformat, Backups, Migration, Fortsetzen |
+| [Fehlerbehebung](handbuch/FEHLERBEHEBUNG.md) | Symptome, Diagnose, Lösungen und Fehlercodes |
+| [Architektur](handbuch/ARCHITEKTUR.md) | Module, Datenfluss, öffentliche Schnittstellen, Invarianten |
+| [Entwicklung und QA](handbuch/ENTWICKLUNG.md) | Tests, Erweiterungen, Webseite, Download- und EXE-Build |
+| [QA-Bericht](handbuch/QA_BERICHT.md) | Konkrete Prüfergebnisse und verbleibende Prüfgrenzen |
+| [Änderungen](handbuch/AENDERUNGEN.md) | Umbau und Änderungen gegenüber der Einzeldatei |
 
-Mit `--ascii` gibt's die reine ASCII-Variante `(o_o)/` für alte Terminals.
+## Projektstruktur
 
-## Munition
-
-Ballern ist **begrenzt**:
-
-- **10 Schuss pro Magazin**
-- Das Magazin frischt sich alle **30 Sekunden** von selbst auf
-- Wer leerballert, muss **5 Sekunden nachladen** — solange macht es nur `*klick*`
-- HUD zeigt `piu [||||||....] 6  17s` bzw. `RELOAD [####......] 3.1s`
-
-Also: nicht jedes `piu` zählt, überspringen ist oft schlauer.
-
-## Hindernisse
-
-Über **30 verschiedene ASCII-Hindernisse**, die gewichtet nach Level auftauchen —
-je weiter du kommst, desto exotischer wird es:
-
-```
-  _      __     /\      %%%    .-.     ,---.   +---+    ___
- | |    /  \    /_\    %%%%%  (ooo)    |###|   |\ /|   /RIP\
-_|_|_   \__/           \|/     |_|     `---'   +---+   |___|
- Kaktus  Stein  Spike   Busch   Pilz    Fass    Kiste   Grab
+```text
+piuu.py                 Kleiner, stabiler Einstiegspunkt
+PIUU.bat                Windows-Start mit vorhandener Python-Installation
+piu/                    Python-Spiel als getrennte Fachmodule
+tests/                  Deterministische Python- und Browser-Tests
+handbuch/               Durchgehende deutsche Dokumentation
+scripts/                QA, Vorschau und Build-Hilfen
+docs/                   Neue statische Webseite (GitHub Pages)
+  assets/               CSS, Browser-Simulation, Oberfläche, Favicon
+  downloads/            Reproduzierbar gebautes Python-ZIP
 ```
 
-Dazu fliegendes Zeug auf verschiedenen Höhen (animiert, 2 Frames):
-Vögel `~o>`, Fledermäuse `/\o/\`, Drohnen `[+]`, Geister `(o o)`, UFOs `(-o-)`.
+## Tests und Vorschau
 
-Und natürlich Wort-Hindernisse: `piu` · `piu piu` · `autsch*` · `aslok` · `haare` · `nope`
-— am Boden oder in der Luft.
-
-## Dynamik
-
-- **Tempo** wächst sanft mit der Strecke (exponentiell gedämpft, x1.0 → x2.7)
-  plus einer Wellen-Modulation, damit es sich nicht monoton anfühlt
-- **Abstände** skalieren mit dem Tempo, damit die Reaktionszeit fair bleibt
-- Dazu Rhythmus-Wechsel: manchmal ein **Doppelschlag**, manchmal eine **Verschnaufpause**
-- Das HUD zeigt den aktuellen Tempo-Multiplikator als `x1.8`
-
-## Was passiert da
-
-- Das Männchen rennt durch eine scrollende ASCII-Landschaft
-- Hindernisse: Kakteen `|_|`, Felsen `/  \`, Spikes `/_\`, fliegende Vögel `~o>`
-- **Manchmal ist das Wort `piu` selbst das Hindernis** — überspringen oder wegballern
-- Im Himmel treiben Sprüche vorbei:
-  *piu piu* · *hast du aslok haare?* · *ik maken piu piu* · *und du nie wieder aslok haare* · *autsch\** · *piu*
-- Wolken, Parallax-Scrolling, Explosionspartikel, mitlaufender Boden
-- Es wird immer schneller. Kills geben +25 Punkte.
-- Startscreen mit `[ START ]`, Game-Over-Screen mit **Hall of Piu**
-
-## Responsive TUI
-
-Das Spielfeld **passt sich automatisch der Terminalgröße an** — auch während
-des Spielens. Fenster ziehen und es skaliert live mit:
-
-- Spielfeld nutzt die volle Breite/Höhe (46×14 bis 200×44)
-- Boden, Wolken und Hintergrund-Sprüche skalieren mit; breite Fenster
-  bekommen mehr Deko statt leerer Fläche
-- HUD kürzt sich bei schmalen Terminals:
-  `score 320 best 999 kills 4 88m x1.4  piu [||||||....] 6 12s`
-  → `320 best 999 k4 88m  piu [||||||....]` → `320 k4 88m  piu 6`
-- Start- und Game-Over-Screen zentrieren sich; unter 17 Zeilen wird
-  das große ASCII-Logo durch eine kompakte Zeile ersetzt
-- Zu kleines Fenster → freundlicher Hinweis, es geht automatisch weiter,
-  sobald du wieder aufziehst
-
-Feste Größe erzwingen: `python piuu.py --size 100x30`
-
-## Spielername
-
-Der Name für den Highscore kommt aus deiner Umgebung (`%USERNAME%` unter
-Windows, `$USER` unter Linux/macOS) — nichts ist im Code hinterlegt.
-Überschreiben mit `--name Kevin`.
-
-## Optionen
-
-```
-python piuu.py --silent        # ohne Ton
-python piuu.py --ascii         # reines ASCII-Maennchen (o_o)/
-python piuu.py --speed 0.7     # gemütlicher
-python piuu.py --name Kevin    # Name für den Highscore
-python piuu.py --scores        # Hall of Piu anzeigen
-python piuu.py --size 100x30   # feste Spielfeldgroesse statt automatisch
-python piuu.py --demo 300      # Autoplay-Demo (Test, ohne Tastatur)
+```console
+python -m unittest discover -s tests -v
+node --test tests/web/*.test.js
+node scripts/preview.mjs
 ```
 
-## Highscores
-
-Es ist ein lokales Spiel — deshalb gibt es **einen Eintrag pro Spieler**,
-nicht eine Liste voller Duplikate:
-
-- Pro Name wird nur die **Bestleistung** gespeichert
-- Jeder Lauf erhöht den Lauf-Zähler: `1. philipp   294  (7 laeufe)`
-- Ein schlechterer Lauf ändert den Rekord nicht (`bestleistung bleibt: 294`)
-- Groß-/Kleinschreibung und Leerzeichen zählen als **derselbe** Spieler
-- Alte Dateien mit Duplikaten werden beim Laden **automatisch zusammengeführt**
-
-Gespeichert in **`piu_highscores.json`** im selben Ordner.
-Anzeigen mit `python piuu.py --scores`.
-
-## Tests
-
-```
-python -m unittest test_piu -v
-```
-
-83 Tests decken Highscores, Munition (10 Schuss / 30 s / 5 s Reload), Physik,
-Kollision, Hindernis-Katalog, responsives Layout, Rendering, Screens und die
-CLI ab. Die Suite wurde per Mutation Testing geprüft: künstlich eingebaute
-Fehler (Duplikat-Bug, falsche Magazingröße, falsche Reload-Zeit, kaputte
-Hitbox, FPS-Drift) werden alle erkannt.
-
-## Exe bauen
-
-Doppelklick auf **`build_exe.bat`** → erzeugt `PIUU.exe` (läuft ohne Python).
-
-Manuell:
-```
-pip install pyinstaller
-pyinstaller --onefile --console --name PIUU piuu.py
-```
-
-## Web-Demo / GitHub Page
-
-Die Seite liegt in `docs/`. Auf GitHub aktivieren unter
-**Settings → Pages → Source: `main` / Ordner `/docs`**.
-
-## Hinweise
-
-Läuft am besten im **Windows Terminal** (Emoji + ANSI-Farben).
-In der alten `cmd.exe` sehen die Kaomoji evtl. kaputt aus — dann `--ascii` benutzen.
-Terminal sollte mindestens **80×20** Zeichen groß sein.
+Die Vorschau ist unter `http://127.0.0.1:4173` erreichbar. Node ab Version 20
+wird nur für Webentwicklung und deren Tests benötigt, nicht für das Python-Spiel
+oder für Besucher der veröffentlichten Webseite. Keine npm-Pakete erforderlich.
+Der Download wird mit `python scripts/build_download.py` gebaut.
 
 ## Lizenz
 
-MIT — siehe [LICENSE](LICENSE).
+[MIT](LICENSE). Ursprüngliches Spiel: Philipp Paulik und die PIU-PIU-Mitwirkenden.
+Keine Konten, keine Werbung, kein Tracking.

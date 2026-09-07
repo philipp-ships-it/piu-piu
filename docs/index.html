@@ -1,405 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PIU PIU (ง•_•)ง — ASCII Runner</title>
-<meta name="description" content="Ein ASCII-Endlosrunner fürs Terminal. Du rennst, springst und machst piu piu.">
-<style>
-  :root{
-    --bg:#0b0e14;--panel:#11151f;--edge:#222a3a;--fg:#c8d3e6;--dim:#6b7790;
-    --grn:#5ef08a;--cyn:#59e0ff;--yel:#ffd45e;--red:#ff5f6d;--mag:#c86bff;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:radial-gradient(1100px 600px at 50% -10%,#17203a 0%,transparent 60%),var(--bg);
-       color:var(--fg);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh}
-  .wrap{max-width:900px;margin:0 auto;padding:34px 18px 70px}
-  header{text-align:center;margin-bottom:26px}
-  pre.logo{color:var(--cyn);font-size:clamp(6px,1.9vw,14px);line-height:1.15;margin:0 0 8px;
-           text-shadow:0 0 18px rgba(89,224,255,.45);overflow:hidden}
-  .tag{color:var(--dim);letter-spacing:.14em;text-transform:uppercase;font-size:12px}
-  h2{color:var(--yel);font-size:17px;margin:32px 0 12px}
-  a{color:var(--cyn)}
-  .card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:16px 18px;
-        box-shadow:0 14px 40px rgba(0,0,0,.45)}
-  #screen{background:#05070c;border:1px solid var(--edge);border-radius:10px;padding:12px;
-          white-space:pre;overflow:hidden;font-size:clamp(6.5px,1.32vw,13px);line-height:1.22;
-          letter-spacing:0;min-height:250px}
-  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}
-  button{background:#18203a;color:var(--fg);border:1px solid #2d3a58;border-radius:8px;
-         padding:9px 15px;font:inherit;font-size:14px;cursor:pointer;transition:.15s}
-  button:hover{background:#222d4d;border-color:var(--cyn);color:#fff}
-  button.primary{background:#1c3a2a;border-color:#2f6b48;color:var(--grn)}
-  .hint{color:var(--dim);font-size:13px;margin-top:8px}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  td,th{padding:7px 10px;border-bottom:1px solid var(--edge);text-align:left}
-  th{color:var(--yel)}
-  kbd{background:#1a2236;border:1px solid #33405e;border-bottom-width:2px;border-radius:5px;
-      padding:1px 7px;font-size:13px;color:#fff}
-  code{background:#05070c;border:1px solid var(--edge);border-radius:6px;padding:2px 6px;
-       font-size:13.5px;color:var(--grn)}
-  pre.sh{background:#05070c;border:1px solid var(--edge);border-radius:8px;padding:14px 16px;
-         overflow-x:auto;color:var(--grn);font-size:13.5px;margin:0}
-  ul{padding-left:20px}li{margin:5px 0}
-  footer{margin-top:42px;text-align:center;color:var(--dim);font-size:13px}
-  .c{color:var(--cyn)}.g{color:var(--grn)}.y{color:var(--yel)}.r{color:var(--red)}
-  .m{color:var(--mag)}.d{color:var(--dim)}.w{color:#fff}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#171916">
+  <meta name="description" content="Kleiner Held. Großes Piu. Ein liebevoll chaotischer ASCII-Endlosrunner. Direkt im Browser spielen oder das Python-Spiel herunterladen.">
+  <title>PIU PIU — Kleiner Held. Großes Piu.</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="module" src="assets/site.js"></script>
 </head>
 <body>
-<div class="wrap">
+<a class="skip" href="#spiel">Zum Spiel springen</a>
+<div class="shell">
+  <header class="topbar">
+    <a href="#" class="brand" aria-label="PIU PIU Startseite">[ piu<span>/</span>piu ]</a>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="#spiel">Das Spiel</a><a href="#anleitung">So geht’s</a><a href="#download">Für dein Terminal ↗</a></nav>
+    <span class="version"><i class="dot" aria-hidden="true"></i>V.02 / BEREIT FÜR CHAOS</span>
+  </header>
 
-<header>
-<pre class="logo"> ____  _   _   _     ____  _   _   _
-|  _ \| | | | | |   |  _ \| | | | | |
-| |_) | | | | | |   | |_) | | | | | |
-|  __/| | | |_| |   |  __/| | | |_| |
-|_|   |_|  \___/    |_|    |_|  \___/</pre>
-<div class="tag">(ง•_•)ง renn. spring. mach piu piu.</div>
-</header>
+  <main>
+    <section class="hero" id="spiel" aria-labelledby="hero-title">
+      <div class="hero-text">
+        <div class="eyebrow">Ein ASCII-Runner mit wenig Pixeln &amp; viel Gefühl</div>
+        <h1 id="hero-title">PIU<span>PIU.</span></h1>
+        <p class="hero-copy"><strong>Kleiner Held. Großes Piu.</strong><br>Du rennst. Du springst. Du ballerst Kakteen weg.<br>Die Welt besteht aus Zeichen. Der Spaß ist echt.</p>
+        <div class="actions"><button class="button primary" id="hero-play">Los, mach piu <span aria-hidden="true">↗</span></button><a class="button" href="#download">Python herunterladen <span aria-hidden="true">↓</span></a></div>
+        <p class="smallprint">Kein Konto. Kein Abo. Nur noch eine Runde.</p>
+      </div>
 
-<div class="card">
-  <div id="screen" tabindex="0"></div>
-  <div class="row">
-    <button class="primary" id="bJump">SPRINGEN (Leertaste)</button>
-    <button id="bShoot">PIU PIU (Enter)</button>
-    <button id="bDuck">DUCKEN (S)</button>
-    <button id="bMute">Ton: AN</button>
-  </div>
-  <div class="hint">Leertaste = springen (2× Doppelsprung) · Enter = schießen · S = ducken · P = Pause<br>
-Munition: 10 Schuss pro Magazin, alle 30 s neu — leergeballert = 5 s Reload</div>
+      <div class="hero-stage">
+        <div class="orbit-note">100% ZEICHEN. <b>0% LANGEWEILE.</b></div>
+        <div class="terminal">
+          <div class="terminal-top"><span class="window-dots" aria-hidden="true">●●●</span><span>piu-piu / browser-arcade</span><span aria-hidden="true">↗</span></div>
+          <div class="world-wrap">
+            <span class="stage-label" aria-hidden="true">LIVE FROM THE TERMINAL_</span>
+            <canvas id="world" width="672" height="432" tabindex="0" aria-label="ASCII-Spielfeld. Leertaste oder W: springen, Enter: schießen, S: ducken, P: Pause." aria-describedby="game-help">Dein Browser unterstützt das Spielfeld nicht. Das Python-Spiel steht unten zum Download bereit.</canvas>
+            <div class="game-overlay" id="game-overlay">
+              <strong id="overlay-title">Bereit für ein bisschen Chaos?</strong>
+              <p id="overlay-copy">Ein kleiner Held gegen eine ziemlich volle Welt.</p>
+              <button class="button primary" id="start-game">Runde starten <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+          <div class="terminal-foot"><span>PUNKTE <strong id="score">00000</strong></span><span>BEST <strong id="best">00000</strong></span><span>PIU <strong id="ammo">10/10</strong></span></div>
+        </div>
+        <div class="sticker float-art" aria-hidden="true">(ง •_•)ง &nbsp; ik maken piu piu</div>
+        <div class="stage-caption"><span><span class="orange">↳</span> Ein kleines Spiel. Ein großes „nochmal“.</span></div>
+        <div class="game-toolbar" aria-label="Spieloptionen">
+          <label for="difficulty">Level</label>
+          <select id="difficulty"><option value="leicht">leicht</option><option value="normal" selected>normal</option><option value="schwer">schwer</option><option value="irre">irre</option></select>
+          <button id="pause-game" disabled>Pause [P]</button>
+          <button id="new-game">Neue Runde</button>
+          <div class="mobile-controls"><button data-action="jump">↑ Sprung</button><button data-action="shoot">→ Piu piu</button><button data-action="duck">↓ Ducken</button></div>
+        </div>
+        <p class="visually-hidden" id="game-help">Aktiviere das Spielfeld zum Spielen. Leertaste, W oder Pfeil hoch: Doppelsprung. Enter: schießen. S oder Pfeil runter: ducken. P oder Escape: Pause. Beim Verlassen der Seite wird die Runde pausiert und lokal gespeichert.</p>
+        <p class="storage-warning" id="storage-warning" hidden>Browser-Speicher nicht verfügbar. Diese Runde bleibt nur bis zum Schließen der Seite erhalten.</p>
+        <p class="storage-warning" id="game-notice" role="status" aria-live="polite"></p>
+        <noscript><p class="storage-warning">Für die Browser-Runde bitte JavaScript aktivieren. Das Python-Spiel funktioniert unabhängig davon.</p></noscript>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true"><div class="marquee-track"><div><span>RENN. SPRING. MACH PIU PIU.</span><span>\(•o•)/</span><span>NOCH. EINE. RUNDE.</span><span>(ง•_•)ง</span><span>ASCII IST NICHT TOT.</span><span>~o&gt;</span></div><div><span>RENN. SPRING. MACH PIU PIU.</span><span>\(•o•)/</span><span>NOCH. EINE. RUNDE.</span><span>(ง•_•)ง</span><span>ASCII IST NICHT TOT.</span><span>~o&gt;</span></div></div></div>
+
+    <section class="section" id="anleitung" aria-labelledby="how-title">
+      <div class="section-head"><div><div class="eyebrow">01 / Viel mehr musst du nicht wissen</div><h2 id="how-title">Drei Moves.<br>Unendlich Möglichkeiten.</h2></div><p>Keine komplizierten Combos. Keine hundert Tasten. Nur du, ein paar Hindernisse und ein sehr überzeugendes „piu“.</p></div>
+      <div class="instructions">
+        <article class="instruction"><span class="step-no">[ 01 — NACH OBEN ]</span><pre aria-hidden="true">     \(•o•)/
+       ↑ ↑</pre><h3>Spring drüber.</h3><p>Kaktus im Weg? Abheben. Noch einer? In der Luft ein zweites Mal springen.</p><div class="key-row"><kbd>LEER</kbd><kbd>W / ↑</kbd></div></article>
+        <article class="instruction"><span class="step-no">[ 02 — NACH VORN ]</span><pre aria-hidden="true">(ง•_•)=
+    - - piu!</pre><h3>Mach piu piu.</h3><p>Räum die Strecke frei. Dein Magazin ist endlich. Dein Tatendrang vermutlich nicht.</p><div class="key-row"><kbd>ENTER</kbd></div></article>
+        <article class="instruction"><span class="step-no">[ 03 — GANZ KLEIN ]</span><pre aria-hidden="true">     ~o&gt;
+  (&gt;_&lt;)__</pre><h3>Kopf runter.</h3><p>Unter den Fliegern bleiben. In der Luft kommst du mit Ducken schneller wieder runter.</p><div class="key-row"><kbd>S / ↓</kbd><kbd>P = PAUSE</kbd></div></article>
+      </div>
+      <p class="note"><b>+25 Punkte</b> pro Treffer. Neue Munition nach 30 Sekunden. Magazin leer? Kurz durchatmen: 5 Sekunden nachladen.</p>
+    </section>
+
+    <section class="section difficulty-grid" aria-labelledby="difficulty-title">
+      <div><div class="eyebrow">02 / Dein Spiel. Dein Chaos.</div><h2 class="difficulty-heading" id="difficulty-title">Von „ganz entspannt“<br>bis <em>„oh, oh.“</em></h2><p class="difficulty-copy">Vier Schwierigkeitsgrade regeln Tempo, Hindernisse und Magazin. Im Python-Spiel kannst du jeden Wert selbst einstellen. Ein bisschen mehr Munition? Ein bisschen weniger Kaktus? Geht klar.</p><p class="difficulty-copy">Und wenn du einfach Quatsch machen willst: fünf Cheats, vom Mega-Sprung bis zur Unverwundbarkeit.</p></div>
+      <div><table class="difficulty-table"><caption class="visually-hidden">Die vier Schwierigkeitsgrade</caption><thead><tr><th>LEVEL</th><th>TEMPO</th><th>DICHTE</th><th>MAGAZIN</th></tr></thead><tbody><tr><td>leicht <span aria-hidden="true">☀</span></td><td>×0.75</td><td class="meter" aria-label="wenig">▪···</td><td>15</td></tr><tr><td>normal</td><td>×1.00</td><td class="meter" aria-label="normal">▪▪··</td><td>10</td></tr><tr><td>schwer</td><td>×1.35</td><td class="meter" aria-label="viele">▪▪▪·</td><td>8</td></tr><tr><td>irre <span aria-hidden="true">↗</span></td><td>×1.75</td><td class="meter" aria-label="extrem">▪▪▪▪</td><td>6</td></tr></tbody></table><p class="cheat-note"><strong>Fair bleibt fair.</strong> Cheat-Runden zählen nicht für den Highscore. „Leicht“ ist übrigens kein Cheat.</p></div>
+    </section>
+
+    <section class="download" id="download" aria-labelledby="download-title">
+      <div><div class="eyebrow">03 / Zuhause ist ein Terminal</div><h2 id="download-title">Dein Terminal<br>kann mehr als<br>Fehler anzeigen.</h2><p>Hol dir das komplette Python-Spiel. Mit allen Cheats, eigenem Schwierigkeitsgrad und einer Runde, die genau dort weitergeht, wo du aufgehört hast.</p><a class="button" href="downloads/piu-piu-python.zip" download>Python-Spiel herunterladen <span aria-hidden="true">↓</span></a><p class="smallprint">ZIP · Python 3.10+ · keine zusätzlichen Pakete · MIT-Lizenz</p></div>
+      <div class="install-box"><div class="install-head"><span>IN DREI SCHRITTEN ZUM PIU</span><span aria-hidden="true">[ _ ]</span></div><div class="install-step"><span>01</span><p>ZIP herunterladen und vollständig entpacken.</p></div><div class="install-step"><span>02</span><p>Windows: <b>PIUU.bat</b> doppelklicken.<br>Oder den entpackten Ordner im Terminal öffnen.</p></div><div class="install-step"><span>03</span><p>Starten. Springen. Glücklich werden.</p></div><div class="command-row"><code id="install-command">python piuu.py</code><button class="copy" id="copy-command" aria-label="Startbefehl kopieren">KOPIEREN ↗</button></div><p class="install-tip">Python fehlt oder wird auf einem Firmenrechner blockiert? Nutze eine freigegebene Installation oder frag deine IT. Die Browser-Runde oben braucht kein Python.</p></div>
+    </section>
+
+    <section class="section" aria-labelledby="faq-title"><div class="section-head"><div><div class="eyebrow">04 / Gut zu wissen</div><h2 id="faq-title">Noch ein kleines<br>Fragezeichen?</h2></div><p>Falls zwischen dir und deinem nächsten Highscore noch etwas steht.</p></div><div class="faqs">
+      <details><summary>Bleibt mein Fortschritt gespeichert?</summary><p>Ja. Das Python-Spiel speichert Einstellungen, Highscores und die laufende Runde lokal in deinem Benutzerordner. Automatisch alle fünf Sekunden Spielzeit sowie bei Pause und Beenden. Die Browser-Runde speichert separat in diesem Browser. Eine Synchronisierung zwischen beiden gibt es nicht.</p></details>
+      <details><summary>Wie funktionieren die Cheats?</summary><p>Im Python-Startmenü findest du unter Settings fünf Schalter: unendlich Munition, Nachladen in 0,35 Sekunden, Unverwundbarkeit, doppelte Punkte und 45 % mehr Sprungkraft. Du kannst sie kombinieren. Cheat-Runden bleiben fortsetzbar, zählen aber weder zum Highscore noch zum Laufzähler.</p></details>
+      <details><summary>Mein Terminal zeigt seltsame Zeichen. Was nun?</summary><p>Starte mit „python piuu.py --ascii“. So besteht wirklich alles aus einfachen ASCII-Zeichen. „--silent“ schaltet den Ton aus. Für die automatische Größe braucht das Terminal mindestens 47 Spalten und 15 Zeilen. Im Download liegt ein deutsches Handbuch mit einer systematischen Fehlerhilfe.</p></details>
+      <details><summary>Muss ich etwas installieren oder mich anmelden?</summary><p>Für die Browser-Runde: nichts. Für das Terminal-Spiel: Python ab Version 3.10. Zusätzliche Python-Pakete brauchst du nicht. Kein Konto, kein Tracking, keine Werbung. Speicherst du im Browser, bleiben die Daten auf deinem Gerät.</p></details>
+    </div></section>
+  </main>
+  <footer class="footer"><a class="brand" href="#">[ piu<span>/</span>piu ]</a><span class="footer-credit">MIT-Lizenz · Mit Zeichen gemacht. Mit Liebe gemeint. (•_•)♡</span><button id="motion-toggle" aria-pressed="false">Animationen pausieren</button></footer>
 </div>
-
-<h2>▸ Im Terminal spielen</h2>
-<div class="card">
-<pre class="sh">git clone https://github.com/philipp-ships-it/piu-piu.git
-cd piu-piu
-python piuu.py</pre>
-<p class="hint" style="margin-bottom:0">Nur Python 3, keine Abhängigkeiten. Windows: Doppelklick auf <code>PIUU.bat</code>.</p>
-</div>
-
-<h2>▸ Steuerung</h2>
-<div class="card">
-<table>
-<tr><th style="width:38%">Taste</th><th>Wirkung</th></tr>
-<tr><td><kbd>Leertaste</kbd> <kbd>W</kbd> <kbd>↑</kbd></td><td>springen — 2× für Doppelsprung</td></tr>
-<tr><td><kbd>S</kbd> <kbd>↓</kbd></td><td>ducken</td></tr>
-<tr><td><kbd>Enter</kbd></td><td><b>piu piu</b> schießen</td></tr>
-<tr><td><kbd>P</kbd></td><td>Pause</td></tr>
-<tr><td><kbd>Q</kbd></td><td>beenden</td></tr>
-</table>
-</div>
-
-<h2>▸ Was passiert da</h2>
-<div class="card">
-<ul>
-<li>Ein Kaomoji-Männchen <span class="g">(ง•_•)ง</span> rennt durch eine scrollende ASCII-Landschaft — mit eigenen Posen für Laufen, Springen <span class="g">\(•o•)/</span>, Fallen, Ducken <span class="g">(&gt;_&lt;)__</span> und Sterben <span class="r">~(X_X)~</span></li>
-<li>Hindernisse: Kakteen, Felsen, Spikes <span class="g">/_\</span>, Vögel <span class="r">~o&gt;</span></li>
-<li>Manchmal ist das Wort <span class="m">piu</span> selbst das Hindernis</li>
-<li>Im Himmel treiben Sprüche vorbei: <span class="d">hast du aslok haare? · ik maken piu piu · autsch* · und du nie wieder aslok haare</span></li>
-<li><b>Begrenzte Munition:</b> 10 Schuss / 30 s, danach 5 s Reload — solange nur <span class="r">*klick*</span></li>
-<li>Über 30 ASCII-Hindernisse: Kakteen, Fässer, Kisten, Gräber, Pilze, Schneemänner, Pyramiden …</li>
-<li>Fliegendes Zeug in mehreren Höhen: <span class="r">~o&gt;</span> Vögel, <span class="r">/\o/\</span> Fledermäuse, <span class="r">[+]</span> Drohnen, <span class="r">(-o-)</span> UFOs, Geister</li>
-<li>Dynamisches Tempo (x1.0 → x2.7) mit Wellen-Modulation, Abstände skalieren mit</li>
-<li>Wolken, Parallax, Explosionspartikel, Hall of Piu</li>
-</ul>
-</div>
-
-<footer>PIU PIU (ง•_•)ง · MIT · piu piu. und du nie wieder aslok haare.</footer>
-</div>
-
-<script>
-(function(){
-const W=76,H=17,GROUND=H-4,PX=5;
-const PHRASES=["piu piu","hast du aslok haare?","ik maken piu piu",
- "und du nie wieder aslok haare","autsch*","piu","piu piu piu",
- "aslok? nie gehoert","PIU!","haare weg. piu."];
-const CLOUD=["   .-~-.   "," (  ___  ) ","  `-...-`  "];
-const BOOM=["piu!","autsch*","weg damit","piu piu"];
-const HERO_W=7, HERO={
-  run:["(ง•_•)ง","ᕦ(•_•)ᕤ"], jump:["\\(•o•)/"], fall:["/(•_•)\\"],
-  duck:["(>_<)__"], shoot:["(ง•_•)="], dead:["~(X_X)~"]};
-const CACTUS_S=["  _  "," | | ","_|_|_"],
-      CACTUS_L=[" _ _ ","| | |","|_|_|","  |  "],
-      CACTUS_XL=[" _ _ _ ","| | | |","|_|_|_|","   |   ","   |   "],
-      ROCK=[" __ ","/  \\","\\__/"],
-      ROCK_BIG=["  ___  "," /   \\ ","/     \\","\\_____/"],
-      PEBBLES=["o O o"],
-      SPIKE=["/\\","/_\\"], SPIKE_2=["/\\/\\","/__ _\\"], SPIKE_3=["/\\/\\/\\","/_ _ _\\"],
-      BARREL=[",---.","|###|","|###|","`---'"],
-      CRATE=["+---+","|\\ /|","|/ \\|","+---+"],
-      FENCE=["|-|-|","|-|-|","|_|_|"],
-      TOMB=[" ___ ","/RIP\\","|   |","|___|"],
-      BUSH=[" %%% ","%%%%%"," \\|/ "],
-      MUSH=[" .-. ","(ooo)"," |_| "],
-      TRASH=["[___]","|:::|","|:::|","|___|"],
-      SNOW=[" (o) ","(   )","(   )"],
-      PYR=["  ^  "," /-\\ ","/---\\"],
-      BIRD_A=["~o>"," ^ "], BIRD_B=["~o>"," v "],
-      BAT_A=["/\\o/\\"], BAT_B=["_o_"],
-      UFO_A=[" .-. ","(-o-)","'* *'"], UFO_B=[" .-. ","(-o-)","* * *"],
-      DRONE_A=["[+]","/ \\"], DRONE_B=["[+]","\\ /"],
-      GHOST_A=[".oOo.","(o o)"," ~~~ "], GHOST_B=[".oOo.","(o o)"," www "];
-const WORDS_LOW=["piu","piu piu","PIU","autsch*","piu!"],
-      WORDS_HIGH=["piu piu piu","aslok","haare","PIU PIU","nope"];
-// [artA, artB, kind, offsets, minLevel, weight]
-const CATALOG=[
- [CACTUS_S,null,'solid',[0],0,10],[ROCK,null,'solid',[0],0,8],
- [SPIKE,null,'solid',[0],0,7],[PEBBLES,null,'solid',[0],0,4],
- [BUSH,null,'solid',[0],0,5],[CACTUS_L,null,'solid',[0],1,7],
- [CRATE,null,'solid',[0],1,5],[MUSH,null,'solid',[0],1,4],
- [SPIKE_2,null,'solid',[0],1,5],[BIRD_A,BIRD_B,'bird',[3,4],1,7],
- [BARREL,null,'solid',[0],2,5],[FENCE,null,'solid',[0],2,4],
- [TRASH,null,'solid',[0],2,4],[BAT_A,BAT_B,'bird',[4,5],2,5],
- [SPIKE_3,null,'solid',[0],3,5],[TOMB,null,'solid',[0],3,4],
- [PYR,null,'solid',[0],3,4],[DRONE_A,DRONE_B,'bird',[3,5],3,5],
- [CACTUS_XL,null,'solid',[0],4,5],[SNOW,null,'solid',[0],4,3],
- [GHOST_A,GHOST_B,'bird',[3,4],4,4],[ROCK_BIG,null,'solid',[0],4,4],
- [UFO_A,UFO_B,'bird',[4,5],5,4]];
-const MAG_SIZE=10, MAG_WINDOW=30, RELOAD_TIME=5, FPS=18;
-const TITLE=[" ____  _   _   _     ____  _   _   _ ",
-"|  _ \\| | | | | |   |  _ \\| | | | | |",
-"| |_) | | | | | |   | |_) | | | | | |",
-"|  __/| | | |_| |   |  __/| | | |_| |",
-"|_|   |_|  \\___/    |_|    |_|  \\___/"];
-const GO=["  ____   _    __  __ ___    _____   _____ ____  ",
-" / ___| / \\  |  \\/  | __|  / _ \\ \\ / / __|  _ \\ ",
-"| |  _ / _ \\ | |\\/| | _|  | (_) \\ V /| _|| |_) |",
-"|_|_|_/_/ \\_\\|_|  |_|___|  \\___/ \\_/ |___|_| \\_\\"];
-
-const el=document.getElementById('screen');
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const ri=n=>Math.floor(Math.random()*n), pick=a=>a[ri(a.length)];
-let muted=false, ac=null;
-function tone(f0,f1,d,t){ if(muted)return; try{
-  ac=ac||new(window.AudioContext||window.webkitAudioContext)();
-  if(ac.state==='suspended')ac.resume();
-  const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;
-  o.type=t||'square';o.frequency.setValueAtTime(f0,n);
-  o.frequency.exponentialRampToValueAtTime(Math.max(40,f1),n+d);
-  g.gain.setValueAtTime(.1,n);g.gain.exponentialRampToValueAtTime(.0008,n+d);
-  o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d+.02);}catch(e){} }
-const sPiu=()=>tone(1700+ri(400),400,.1),
-      sJump=()=>tone(650,1150,.09,'triangle'),
-      sKill=()=>tone(800,180,.16,'sawtooth'),
-      sHit=()=>{tone(300,70,.4,'sawtooth');setTimeout(()=>tone(180,50,.3),60);},
-      sClick=()=>{tone(150,90,.05,'square');},
-      sEmpty=()=>{tone(400,240,.12,'square');},
-      sReload=()=>{tone(700,1050,.1,'triangle');},
-      sGo=()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.09,'triangle'),i*85));
-
-// Buffer
-function Buf(){ this.g=[];this.c=[];
-  for(let y=0;y<H;y++){this.g.push(new Array(W).fill(' '));this.c.push(new Array(W).fill(null));} }
-Buf.prototype.put=function(x,y,s,col){ if(y<0||y>=H)return; x=Math.round(x);
-  for(let i=0;i<s.length;i++){const xx=x+i; if(xx>=0&&xx<W){this.g[y][xx]=s[i];this.c[y][xx]=col;}} };
-Buf.prototype.art=function(x,yb,a,col){ for(let i=0;i<a.length;i++) this.put(x,yb-(a.length-1-i),a[i],col); };
-Buf.prototype.render=function(){ let o='';
-  for(let y=0;y<H;y++){ let cur=null,open=false,line='';
-    for(let x=0;x<W;x++){ const ch=this.g[y][x],col=this.c[y][x];
-      if(col!==cur){ if(open){line+='</span>';open=false;} if(col){line+='<span class="'+col+'">';open=true;} cur=col; }
-      line+=esc(ch); }
-    if(open)line+='</span>'; o+=line+(y<H-1?'\n':''); }
-  el.innerHTML=o; };
-
-let state='start', g=null, blink=0, hs=+(localStorage.getItem('piu_hs')||0), goData=null;
-
-function newGame(){ return {y:0,vy:0,jumps:0,duck:0,shootT:0,t:0,ammo:MAG_SIZE,reloadT:0,magT:MAG_WINDOW,clickT:0,obs:[],bul:[],bg:(function(){
-    const rows=[];while(rows.length<3){const r=2+ri(GROUND-7);if(rows.indexOf(r)<0)rows.push(r);}
-    return rows.map(r=>[Math.random()*W,r,pick(PHRASES)]);})(),
-  clouds:[[Math.random()*W,ri(2)]],parts:[],dist:0,score:0,kills:0,spawn:20,dead:false,msg:'',msgT:0}; }
-
-function mkObs(lvl){
-  if(Math.random()<.16){
-    const hi=lvl>=2&&Math.random()<.5;
-    return {art:[pick(hi?WORDS_HIGH:WORDS_LOW)],art2:null,kind:'word',
-            off:hi?pick([3,4]):0};
-  }
-  const opts=CATALOG.filter(c=>c[4]<=lvl);
-  let tot=0; opts.forEach(c=>tot+=c[5]);
-  let r=Math.random()*tot, c=opts[0];
-  for(const o of opts){ r-=o[5]; if(r<=0){c=o;break;} }
-  return {art:c[0],art2:c[1],kind:c[2],off:pick(c[3])};
-}
-function jump(){ if(g&&g.jumps<2){g.vy=g.jumps===0?1.5:1.3;g.jumps++;g.duck=0;sJump();} }
-function duck(){ if(!g)return; if(g.y<=.01)g.duck=8; else g.vy-=.9; }
-function shoot(){ if(!g)return;
-  if(g.reloadT>0||g.ammo<=0){ if(g.clickT<=0)sClick(); g.clickT=10; return; }
-  let by=GROUND-1-Math.round(g.y); if(g.duck)by=GROUND-1;
-  g.bul.push([PX+HERO_W-1,by]); g.shootT=4; g.ammo--; sPiu();
-  if(g.ammo===0){ g.reloadT=RELOAD_TIME; sEmpty(); } }
-
-function artOf(o){ return (o.art2&&o.f>=4)?o.art2:o.art; }
-function rowsOf(o){ const a=artOf(o),b=GROUND-1-o.off; return [b-a.length+1,b]; }
-
-function step(){
-  g.t++;
-  const base=.95+1.75*(1-Math.exp(-g.dist/1400));
-  const wave=.12*Math.sin(g.t/47)+.07*Math.sin(g.t/13);
-  const sp=Math.max(.7,base+wave);
-  g.speed=sp;
-  g.dist+=sp; g.score=Math.floor(g.dist/3)+g.kills*25;
-  g.vy-=.16; g.y+=g.vy;
-  if(g.y<=0){g.y=0;g.vy=0;g.jumps=0;}
-  if(g.duck)g.duck--;
-  if(g.shootT>0)g.shootT--;
-  if(g.clickT>0)g.clickT--;
-  const dt=1/FPS;
-  if(g.reloadT>0){ g.reloadT-=dt;
-    if(g.reloadT<=0){g.reloadT=0;g.ammo=MAG_SIZE;g.magT=MAG_WINDOW;sReload();} }
-  else { g.magT-=dt;
-    if(g.magT<=0){ if(g.ammo<MAG_SIZE){g.ammo=MAG_SIZE;sReload();} g.magT=MAG_WINDOW; } }
-
-  g.bg.forEach(p=>p[0]-=sp*.35);
-  g.bg=g.bg.filter(p=>p[0]+p[2].length>0);
-  if(Math.random()<.035&&g.bg.length<5){
-    const taken=g.bg.filter(p=>p[0]+p[2].length>W-4).map(p=>p[1]);
-    const free=[];for(let y=2;y<GROUND-5;y++)if(taken.indexOf(y)<0)free.push(y);
-    if(free.length)g.bg.push([W,pick(free),pick(PHRASES)]); }
-  g.clouds.forEach(c=>c[0]-=sp*.18);
-  g.clouds=g.clouds.filter(c=>c[0]+11>0);
-  if(Math.random()<.012&&g.clouds.length<2)g.clouds.push([W,ri(2)]);
-
-  g.obs.forEach(o=>{o.x-=sp; if(o.kind==='bird'){o.x-=sp*.25;o.f=((o.f||0)+1)%8;}});
-  g.obs=g.obs.filter(o=>o.x+o.w>0);
-  g.spawn-=sp;
-  if(g.spawn<=0){ const lvl=Math.floor(g.dist/400), m=mkObs(lvl);
-    g.obs.push({x:W+2,art:m.art,art2:m.art2,kind:m.kind,off:m.off,f:ri(8),
-      w:Math.max.apply(null,m.art.map(r=>r.length))});
-    const react=15+9*sp; let gap=react*(.75+Math.random()*.9);
-    const r=Math.random();
-    if(r<.14&&lvl>=1)gap=react*.55; else if(r>.93)gap=react*2.4;
-    g.spawn=Math.max(13,gap); }
-
-  g.bul.forEach(b=>b[0]+=3.4);
-  g.bul=g.bul.filter(b=>b[0]<W);
-  for(const b of g.bul.slice()) for(const o of g.obs.slice()){
-    const [t,bo]=rowsOf(o);
-    if(b[0]>=o.x-1&&b[0]<=o.x+o.w&&b[1]>=t&&b[1]<=bo){
-      g.obs.splice(g.obs.indexOf(o),1); g.bul.splice(g.bul.indexOf(b),1);
-      g.kills++; sKill(); g.msg=pick(BOOM); g.msgT=12;
-      for(let i=0;i<7;i++)g.parts.push([o.x+o.w/2,(t+bo)/2,
-        (Math.random()-.5)*1.6,(Math.random()-.5)*1,3+ri(5),pick("*.,'`^")]);
-      break; } }
-
-  g.parts.forEach(p=>{p[0]+=p[2];p[1]+=p[3];p[4]--;});
-  g.parts=g.parts.filter(p=>p[4]>0);
-  if(g.msgT>0)g.msgT--;
-
-  const pr=GROUND-1-Math.round(g.y);
-  for(const o of g.obs){ const [t,bo]=rowsOf(o);
-    if(o.x+o.w-1<PX+0.8||o.x>PX+HERO_W-3.2)continue;
-    if(pr>=t&&pr<=bo){g.dead=true;return;} }
-}
-
-function heroPose(){
-  if(g.dead)return HERO.dead[0];
-  if(g.duck)return HERO.duck[0];
-  if(g.shootT>0)return HERO.shoot[0];
-  if(g.y>.3)return g.vy>0?HERO.jump[0]:HERO.fall[0];
-  return HERO.run[Math.floor(g.dist/2)%2];
-}
-function heroCol(){
-  if(g.dead)return 'r'; if(g.shootT>0)return 'y';
-  if(g.duck)return 'c'; return 'g';
-}
-function draw(){
-  const b=new Buf();
-  g.clouds.forEach(c=>CLOUD.forEach((r,i)=>b.put(c[0],c[1]+i,r,'d')));
-  g.bg.forEach(p=>b.put(p[0],p[1],p[2],'d'));
-  g.parts.forEach(p=>b.put(p[0],Math.round(p[1]),p[5],'y'));
-  g.obs.forEach(o=>{ const col=o.kind==='word'?'m':(o.kind==='bird'?'r':'g');
-    b.art(o.x,GROUND-1-o.off,artOf(o),col); });
-  g.bul.forEach(bl=>b.put(bl[0],bl[1],'-=','y'));
-  const pr=GROUND-1-Math.round(g.y);
-  b.put(PX,pr,heroPose(),heroCol());
-  if(g.y>.3&&!g.duck)b.put(PX+2,pr+1,'^','d');
-  b.put(0,GROUND,'_'.repeat(W),'d');
-  const pat='^~-_'; let gl='';
-  for(let x=0;x<W;x++)gl+=pat[(x+Math.floor(g.dist))%4];
-  b.put(0,GROUND+1,gl,'d');
-  if(g.msgT>0)b.put(PX+4,pr-1,g.msg,'y');
-  b.put(1,H-1,' score '+g.score+'  best '+Math.max(hs,g.score)+'  kills '+g.kills+
-        '  '+Math.floor(g.dist/4)+'m  x'+g.speed.toFixed(1),'w');
-  const ax=W-26;
-  if(g.reloadT>0){
-    const f=Math.round((1-g.reloadT/RELOAD_TIME)*10);
-    b.put(ax,H-1,'RELOAD ['+'#'.repeat(f)+'.'.repeat(10-f)+'] '+g.reloadT.toFixed(1)+'s','r');
-  } else {
-    b.put(ax,H-1,'piu ['+'|'.repeat(g.ammo)+'.'.repeat(MAG_SIZE-g.ammo)+'] '+
-          g.ammo+'  '+Math.floor(g.magT)+'s',g.ammo>3?'g':'y');
-  }
-  if(g.clickT>0)b.put(PX+HERO_W,pr,' *klick*','r');
-  b.render();
-}
-
-function drawStart(){
-  const b=new Buf();
-  TITLE.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'c'));
-  b.put((W-27)/2,7,'renn. spring. mach piu piu.','d');
-  b.put(5,9,HERO.run[0],'g'); b.put(14,9,'- - -','y');
-  b.put(21,9,'piu piu','m'); b.put(32,9,'~o>','r');
-  b.put(40,9,' _ ','g'); b.put(40,10,'|_|','g');
-  b.put(0,11,'^'.repeat(W),'d');
-  const btn=(blink>>2)%2===0?'[ START ]':'[       ]';
-  b.put((W-btn.length)/2,13,btn,'g');
-  b.put((W-38)/2,15,'LEER=springen  ENTER=piu piu  S=ducken','d');
-  b.put((W-37)/2,16,'10 schuss / 30s  danach 5s nachladen','d');
-
-  b.render();
-}
-
-function drawGO(){
-  const b=new Buf();
-  GO.forEach((r,i)=>b.put((W-r.length)/2,1+i,r,'r'));
-  b.put((W-7)/2,6,HERO.dead[0],'r');
-  b.put((W-7)/2,7,'autsch*','y');
-  const m='score '+goData.s+'   kills '+goData.k+'   strecke '+goData.d+'m';
-  b.put((W-m.length)/2,8,m,'w');
-  if(goData.rec)b.put((W-21)/2,9,'*** NEUER REKORD! ***','m');
-  b.put((W-17)/2,10,'-- hall of piu --','c');
-  b.put((W-15)/2,12,'best: '+hs,'g');
-  const t=(blink>>2)%2===0?'LEERTASTE = nochmal':'                   ';
-  b.put((W-t.length)/2,15,t,'y');
-  b.render();
-}
-
-let last=0;
-function loop(ts){
-  requestAnimationFrame(loop);
-  if(ts-last<55)return; last=ts;
-  blink++;
-  if(state==='start'){drawStart();return;}
-  if(state==='over'){drawGO();return;}
-  if(state==='pause')return;
-  step(); draw();
-  if(g.dead){ sHit(); const rec=g.score>hs; if(rec){hs=g.score;localStorage.setItem('piu_hs',hs);}
-    goData={s:g.score,k:g.kills,d:Math.floor(g.dist/4),rec:rec};
-    state='over'; setTimeout(sGo,300); }
-}
-
-function start(){ g=newGame(); state='play'; sGo(); }
-function action(a){
-  if(state==='start'){ if(a==='jump'||a==='shoot')start(); return; }
-  if(state==='over'){ if(a==='jump'||a==='shoot')start(); return; }
-  if(state==='pause'){ state='play'; return; }
-  if(a==='jump')jump(); else if(a==='shoot')shoot();
-  else if(a==='duck')duck(); else if(a==='pause')state='pause';
-}
-document.addEventListener('keydown',e=>{
-  const k=e.key.toLowerCase();
-  if(e.code==='Space'||k==='w'||k==='arrowup'){e.preventDefault();action('jump');}
-  else if(k==='enter'){e.preventDefault();action('shoot');}
-  else if(k==='s'||k==='arrowdown'){e.preventDefault();action('duck');}
-  else if(k==='p')action('pause');
-});
-document.getElementById('bJump').onclick=()=>action('jump');
-document.getElementById('bShoot').onclick=()=>action('shoot');
-document.getElementById('bDuck').onclick=()=>action('duck');
-document.getElementById('bMute').onclick=function(){muted=!muted;this.textContent='Ton: '+(muted?'AUS':'AN');};
-el.addEventListener('pointerdown',()=>action('jump'));
-requestAnimationFrame(loop);
-})();
-</script>
 </body>
 </html>
